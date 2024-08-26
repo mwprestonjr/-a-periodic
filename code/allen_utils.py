@@ -2,7 +2,9 @@
 Utility functions
 """
 
-# functions
+# imports
+import numpy as np
+
 
 def find_probes_in_region(session, region):
     probe_ids = session.probes.index.values
