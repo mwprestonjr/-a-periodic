@@ -16,66 +16,38 @@ downsample_tfr : Downsample time-frequency representation to n time bins.
 import numpy as np
 
 
-def compute_tfr(signal, sfreq, f_min=None, f_max=None, n_freqs=256, 
-                time_window_length=0.5, freq_bandwidth=4, n_jobs=-1, 
-                output='power', decim=1, verbose=False):
-    '''
-    This function takes an array (n_epochs, n_channels, n_times) and computes the time-frequency
-    representatoin of power using the multitaper method. 
-    Due to memory demands, this function should be run on single-channel data, 
-    or results can be averaged across trials.
-    
+def compute_tfr(lfp, fs, freqs, freq_spacing='lin', time_window_length=0.5, 
+                freq_bandwidth=4, n_jobs=-1, decim=1, output='power', 
+                verbose=False):
+    """
+    Compute time-frequency representation (TFR) of LFP data.
+
     Parameters
     ----------
-    signal : 3D array
-        Array of shape (n_epochs, n_channels, n_times) containing the data.
-    sfreq : float
-        Sampling frequency of the data.
-    f_min : float
-        Minimum frequency of interest. If None, set to 1/T, where T is the length of the time window.
-    f_max : float
-        Maximum frequency of interest. If None, set to Nyquist frequency (sfreq/2).
-    n_freqs : int
-        Number of frequencies to use for the TF decomposition.
-    time_window_length : float
-        Length of the time window (in seconds) to use for the TF decomposition.
-    freq_bandwidth : float
-        Bandwidth of the frequency window (in Hz) to use for the TF decomposition.
-    n_jobs : int
-        Number of jobs to run in parallel. If -1, use all available cores.
-    output : str
-        Type of output to return. The default is 'power'
-    decim : int
-        Decimation factor to use for the TF decomposition.
-    verbose : bool
-        Whether to print progress updates.
+    lfp : 3d array
+        LFP data (trials x channels x samples).
+    fs : int
+        Sampling frequency.
+    freqs : 1d array
+        Frequency vector (start, stop, n_freqs).
+    """
 
-    Returns
-    -------
-    tfr : 4D array
-        Array of shape (n_epochs, n_channels, n_freqs, n_times) containing the TF representation.
-    '''
     # imports
     from mne.time_frequency import tfr_array_multitaper
-    
-    # set paramters for TF decomposition
-    if f_min is None:
-        period = signal.shape[2]/sfreq
-        f_min = (1/period)
-    if f_max is None:
-        f_max = sfreq / 2 # Nyquist
-        freq = np.logspace(*np.log10([f_min, f_max]), n_freqs, endpoint=False) # log-spaced freq vector
-    else:
-        freq = np.logspace(*np.log10([f_min, f_max]), n_freqs, endpoint=True) # log-spaced freq vector
+
+    # define hyperparameters
+    if freq_spacing == 'lin':
+        freq = np.linspace(*freqs)
+    elif freq_spacing == 'log':
+        freq = np.logspace(*np.log10(freqs[:2]), freqs[2])
     n_cycles = freq * time_window_length # set n_cycles based on fixed time window length
     time_bandwidth =  time_window_length * freq_bandwidth # must be >= 2
 
     # TF decomposition using multitapers
-    tfr = tfr_array_multitaper(signal, sfreq, freqs=freq, n_cycles=n_cycles, 
-                            time_bandwidth=time_bandwidth, output=output, n_jobs=n_jobs,
-                            decim=decim, verbose=verbose)
+    tfr = tfr_array_multitaper(lfp, sfreq=fs, freqs=freq, n_cycles=n_cycles, 
+                                time_bandwidth=time_bandwidth, output=output, 
+                                n_jobs=n_jobs, decim=decim, verbose=verbose)
 
-    # return full array for now
     return tfr, freq
 
 
