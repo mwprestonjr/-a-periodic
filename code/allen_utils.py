@@ -6,7 +6,7 @@ Utility functions
 import numpy as np
 
 
-def get_lfp_epochs(cache, session_id, brain_structure, fs=1250):
+def get_lfp_epochs(session_data, brain_structure, fs=1250):
     """
     Load LFP data for a given session and brain structure. Align LFP data to
     natural movie events.
@@ -15,10 +15,8 @@ def get_lfp_epochs(cache, session_id, brain_structure, fs=1250):
 
     Parameters
     ----------
-    cache : AllenSDK cache object
-        AllenSDK cache object.
-    session_id : int
-        session id.
+    session_data : AllenSDK session object
+        AllenSDK session object.
     brain_structure : str
         brain structure to filter LFP data.
     fs : int, optional
@@ -34,10 +32,6 @@ def get_lfp_epochs(cache, session_id, brain_structure, fs=1250):
     
     # imports
     import xarray as xr
-
-    # load session data
-    print(f"Loading data for sessions: {session_id}...")
-    session_data = cache.get_session_data(session_id)
 
     # identify probes in ROI
     print(f"Finding data for {brain_structure}...")
@@ -62,8 +56,8 @@ def get_lfp_epochs(cache, session_id, brain_structure, fs=1250):
     lfp = xr.concat(lfp_list, "channel")
     
     # check data, print status
-    print(f"  {len(lfp['channel'])} channels found")
-    if len(stim_times)==0:
+    print(f"  {len(lfp['channel'])} channel(s) found")
+    if len(lfp['channel'])==0:
         print('Check settings! No LFP data found')
         return np.nan, np.nan
     
