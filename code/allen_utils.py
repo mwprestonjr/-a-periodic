@@ -141,7 +141,7 @@ def align_lfp(lfp, event_times, t_window=[-1,1], dt=0.001):
 
 # Function to get spikes within a time window
 def get_spikes_in_window(spike_times, start_time, stop_time):
-     """
+    """
     Extract spike times that fall within a specified time window.
 
     Parameters:
