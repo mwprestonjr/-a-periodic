@@ -13,4 +13,9 @@ RUN pip install -U --no-cache-dir \
     brain-observatory-utilities==0.4.0 \
     pandas==1.5.3 \
     scikit-learn==1.5.1 \
-    seaborn==0.13.2
+    seaborn==0.13.2 \
+    scikit-learn==1.5.1 \
+    mne==1.8.0 \
+    joblib==1.4.2 \
+    specparam==2.0.0rc2
+    
