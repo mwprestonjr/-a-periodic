@@ -73,10 +73,10 @@ def plot_tfr(time, freqs, tfr, fname_out=None, title=None,
 
     if norm_type == 'linear':
         norm = Normalize(vmin=vmin, vmax=vmax)
-        cmap = 'hot'
+        cmap = 'viridis'
     elif norm_type == 'log':
         norm = LogNorm(vmin=vmin, vmax=vmax)
-        cmap = 'hot'
+        cmap = 'viridis'
     elif norm_type == 'centered':
         norm = CenteredNorm(vcenter=0)
         cmap = 'coolwarm'
@@ -93,7 +93,7 @@ def plot_tfr(time, freqs, tfr, fname_out=None, title=None,
         raise ValueError('Both fig and ax must be provided if one is provided.')
 
     # plot tfr
-    ax.pcolor(time, freqs, tfr, cmap=cmap, norm=norm)
+    ax.pcolor(time, freqs, tfr, cmap=cmap, norm=norm, shading='nearest')
 
     # set labels and scale
     if log_yscale is True:
