@@ -23,3 +23,4 @@ SPECPARAM_SETTINGS = {
     'max_n_peaks'       :   4, # default : inf
     'peak_threshold'    :   3, # default : 2.0
     'aperiodic_mode'    :   'knee'} # 'fixed' or 'knee'
+N_JOBS = -1 # number of jobs for parallel processing
