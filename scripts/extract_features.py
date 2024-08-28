@@ -2,6 +2,10 @@
 Extract LFP and spike features
 """
 
+# suppress cumbersome AllenSDK warnings
+import warnings
+warnings.filterwarnings("ignore")
+
 # imports - general
 import os
 import numpy as np
@@ -73,6 +77,7 @@ def main():
                 'trial'          : np.repeat(np.arange(30), 60),
                 'bin'            : np.tile(np.arange(30), 60)})
             df['exponent'] = exponent
+            df['total_power'] = np.ravel(np.mean(tfr, axis=1))
             df['burst_count'] = burst_df['burst_count']
             df['spike_count'] = spike_df['spike_count']
             
