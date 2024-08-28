@@ -9,10 +9,10 @@ from allensdk.brain_observatory.ecephys.ecephys_project_cache import EcephysProj
 # imports - custom
 import sys
 sys.path.append("../code")
-from info import FS_LFP
+from settings import SESSIONS, BRAIN_STRUCTURES, FS_LFP, MOVIE_DURATION, SPECPARAM_SETTINGS, N_JOBS
+from utils import set_data_root, compute_exponents
 from allen_utils import get_lfp_epochs
-from settings import SESSIONS, BRAIN_STRUCTURES
-from utils import set_data_root
+from tfr_utils import compute_tfr
 
 # settings
 
@@ -37,15 +37,24 @@ def main():
         
         # loop through regions of interest
         for brain_structure in BRAIN_STRUCTURES:
+            # Extract LFP features -----------------------------------------------------
             # Get LFP events
             lfp_epochs, time = get_lfp_epochs(session_data, brain_structure='VISp', fs=FS_LFP)
+
+            # compute tfr
+            tfr_all, tfr_freqs = compute_tfr(lfp_epochs, FS_LFP, FREQS, freq_bandwidth=4,
+                                             time_window_length=1, decim=FS_LFP) # decim to 1 Hz
+            tfr = np.mean(tfr_all, axis=1) # average over channels
             
-            # Extract LFP features
+            # compute aperiodic exponent
+            exponent = compute_exponents(tfr, freqs, SPECPARAM_SETTINGS, N_JOBS)
+            
             """
             <EXTRACT LFP FEATURES>
             """
+
             
-            # Extract Spike Features
+            # Extract Spike Features ----------------------------------------------------
             """
             <EXTRACT SPIKE FEATURES>
             """
