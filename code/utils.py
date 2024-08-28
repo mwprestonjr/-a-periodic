@@ -65,3 +65,28 @@ def apply_specparam(spectra, freqs, specparam_settings, n_jobs=-1):
     sgm = combine_model_objs(sgm)
     
     return sgm
+
+
+def compute_flattened_spectra(sgm):
+    """
+    Compute flattened power spectra from SpectralGroupModel object.
+
+    Parameters
+    ----------
+    sgm : SpectralGroupModel object
+        SpectralGroupModel object.
+
+    Returns
+    -------
+    spectra_flat : 2d array
+        Flattened power spectra.    
+    """
+    
+    spectra_list = []
+    for ii in range(len(sgm)):
+        sm = sgm.get_model(ii)
+        spectra_list.append(sm.power_spectrum - sm._ap_fit)
+    spectra_flat = np.array(spectra_list)
+    
+    return spectra_flat
+
