@@ -56,7 +56,7 @@ def compute_exponents(spectra, freqs, specparam_settings, n_jobs=-1):
     fgs = fit_models_3d(fg, freqs, spectra_rs, n_jobs=n_jobs)
     fgs = combine_model_objs(fgs)
     exponent = fgs.get_params('aperiodic', 'exponent')
-    exponent = np.reshape(exponent, [spectra.shape[0], spectra.shape[2]])
+    # exponent = np.reshape(exponent, [spectra.shape[0], spectra.shape[2]])
     
     return exponent
     
