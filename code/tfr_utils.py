@@ -4,12 +4,12 @@ power (spectrograms).
 
 Functions:
 ----------
-plot_tfr : Plot spectrogram
-compute_tfr : Compute spectrogam of power using multitaper method.
-zscore_tfr : Normalize spectrogam by z-scoring power at each frequency.
-subtract_baseline : Subtract baseline from signals.
-crop_tfr : Crop spectrogam to specified time range.
-downsample_tfr : decimate spectrogam in time.
+- plot_tfr : Plot spectrogram
+- compute_tfr : Compute spectrogam of power using multitaper method.
+- zscore_tfr : Normalize spectrogam by z-scoring power at each frequency.
+- subtract_baseline : Subtract baseline from signals.
+- crop_tfr : Crop spectrogam to specified time range.
+- downsample_tfr : decimate spectrogam in time.
 
 """
 

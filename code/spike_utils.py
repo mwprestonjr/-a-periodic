@@ -1,7 +1,8 @@
 """
-Spike analysis utility functions:
+Spike analysis utility functions.
 
-Functions include:
+Functions:
+----------
 - get_spikes_in_window
 - maxInterval
 - collect_burst_times

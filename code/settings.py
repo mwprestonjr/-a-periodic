@@ -1,5 +1,6 @@
 """
-settings
+Settings and dataset details
+
 """
 
 # dataset details

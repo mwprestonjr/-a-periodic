@@ -1,5 +1,11 @@
 """
-Utility functions
+Utility functions.
+
+Functions:
+----------
+- set_data_root
+- compute_exponents
+
 """
 
 def set_data_root():

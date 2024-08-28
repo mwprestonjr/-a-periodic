@@ -1,7 +1,8 @@
 """
-Utility functions
+Utility functions for handling data and objects from the AllenSDK.
 
-Functions include:
+Functions:
+----------
 - get_lfp_epochs
 - find_probes_in_region
 - align_lfp

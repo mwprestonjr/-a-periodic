@@ -1,5 +1,10 @@
 """
-Plotting functions
+Plotting functions.
+
+Functions:
+----------
+- plot_spectra
+
 """
 
 
