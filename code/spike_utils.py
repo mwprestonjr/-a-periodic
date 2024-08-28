@@ -14,7 +14,7 @@ FUNCTIONS:
 EXAMPLE USAGE:
 -------------
 
-burst_df = get_session_bursts(session, region_acronym, FRAMES_PER_TRIAL, TOTAL_TRIALS, BIN_DURATION)
+burst_df, spike_df = get_session_bursts(session, region_acronym, FRAMES_PER_TRIAL, TOTAL_TRIALS, BIN_DURATION)
 
 """
 
@@ -358,5 +358,68 @@ def get_session_bursts(session, region_acronym, FRAMES_PER_TRIAL, TOTAL_TRIALS, 
     
     # Extract burst counts across all units across all trials
     burst_df = get_burst_counts(burst_times, trials_df, BIN_DURATION)
+
+    # Extrat spike counts across all units across all trials
+    spike_df = get_spike_counts(trial_spikes, trials_df, BIN_DURATION)
     
-    return burst_df
+    return burst_df, spike_df
+
+def get_spike_counts(trial_spikes, trials_df, bin_duration):
+    """
+    Calculate spike counts for each time bin across all trials and units.
+    
+    Parameters:
+    trial_spikes (dict): A nested dictionary structure where:
+        - The outer key is the trial number
+        - The inner key is the unit ID
+        - The value is a list of spike times
+    trials_df (pd.DataFrame): A DataFrame containing trial information, with columns:
+        - 'trial_number': The trial identifier
+        - 'start_time': The start time of the trial
+        - 'stop_time': The end time of the trial
+    bin_duration (float): The duration of each time bin in seconds
+    
+    Returns:
+    pd.DataFrame: A DataFrame with columns:
+        - 'trial': The trial number
+        - 'bin': The bin number within the trial
+        - 'spike_count': The number of spikes in that bin
+    """
+    # Initialize an empty list to store spike data for all trials
+    spike_data = []
+    
+    # Iterate through each trial in the trial_spikes dictionary
+    for trial_number, trial_spikes_data in trial_spikes.items():
+        # Get the trial information from trials_df
+        trial_info = trials_df[trials_df['trial_number'] == trial_number].iloc[0]
+        trial_start = trial_info['start_time']
+        trial_end = trial_info['stop_time']
+        trial_duration = trial_end - trial_start
+        
+        # Calculate the number of bins for this trial
+        n_bins = int(np.floor(trial_duration / bin_duration))  # Use floor to avoid extra bin
+        
+        # Initialize an array to count spikes in each bin
+        spike_counts = np.zeros(n_bins)
+        
+        # Iterate through each unit's spikes in this trial
+        for unit_id, spikes in trial_spikes_data.items():
+            # Process each spike for this unit
+            for spike_time in spikes:
+                # Check if the spike is within the trial time
+                if trial_start <= spike_time < trial_end:
+                    # Calculate which bin this spike belongs to
+                    bin_number = int((spike_time - trial_start) / bin_duration)
+                    if 0 <= bin_number < n_bins:
+                        spike_counts[bin_number] += 1
+        
+        # Create a dictionary entry for each bin in this trial
+        for bin_number, spike_count in enumerate(spike_counts):
+            spike_data.append({
+                'trial': trial_number,
+                'bin': bin_number,
+                'spike_count': spike_count
+            })
+    
+    # Convert the list of dictionaries to a DataFrame and return it
+    return pd.DataFrame(spike_data)
