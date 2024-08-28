@@ -48,8 +48,8 @@ def main():
             tfr = np.mean(tfr_all, axis=1) # average over channels
             
             # parameterize spectra and compute aperiodic exponent
-            fgs = apply_specparam(tfr, tfr_freqs, SPECPARAM_SETTINGS, N_JOBS)
-            exponent = fgs.get_params('aperiodic', 'exponent')
+            sgm = apply_specparam(tfr, tfr_freqs, SPECPARAM_SETTINGS, N_JOBS)
+            exponent = sgm.get_params('aperiodic', 'exponent')
             
             """
             <EXTRACT LFP FEATURES>
