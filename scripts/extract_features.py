@@ -9,10 +9,11 @@ from allensdk.brain_observatory.ecephys.ecephys_project_cache import EcephysProj
 # imports - custom
 import sys
 sys.path.append("../code")
-from settings import SESSIONS, BRAIN_STRUCTURES, FS_LFP, MOVIE_DURATION, FREQS, FREQ_BANDWIDTH, TIME_WINDOW_LENGTH, SPECPARAM_SETTINGS, N_JOBS
+from settings import SESSIONS, BRAIN_STRUCTURES, FS_LFP, MOVIE_DURATION, FREQS, FREQ_BANDWIDTH, TIME_WINDOW_LENGTH, SPECPARAM_SETTINGS, N_JOBS, FRAMES_PER_TRIAL, TOTAL_TRIALS, BIN_DURATION
 from utils import set_data_root, compute_exponents
 from allen_utils import get_lfp_epochs
 from tfr_utils import compute_tfr
+from spike_utils import get_session_bursts
 
 
 def main():
@@ -50,6 +51,9 @@ def main():
             """
 
             # extract Spike Features ----------------------------------------------------
+            burst_df = get_session_bursts(session_data, brain_structure, FRAMES_PER_TRIAL, 
+                                          TOTAL_TRIALS, BIN_DURATION)
+            
             """
             <EXTRACT SPIKE FEATURES>
             """
@@ -62,6 +66,7 @@ def main():
                 'trial': np.repeat(np.arange(30), 60),
                 'bin': np.tile(np.arange(30), 60)})
             df['exponent'] = exponent
+            df['burst_count'] = burst_df['burst_count']
             
             """
             <ADD FEATURES TO DF>
