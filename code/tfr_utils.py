@@ -131,7 +131,7 @@ def plot_tfr(time, freqs, tfr, fname_out=None, title=None,
 
 def compute_tfr(lfp, fs, freqs, freq_spacing='lin', time_window_length=0.5, 
                 freq_bandwidth=4, n_jobs=-1, decim=1, output='power', 
-                verbose=False):
+                method='multitaper', n_morlet_cycle=7, verbose=False):
     """
     Compute time-frequency representation (TFR) of LFP data.
 
@@ -146,7 +146,7 @@ def compute_tfr(lfp, fs, freqs, freq_spacing='lin', time_window_length=0.5,
     """
 
     # imports
-    from mne.time_frequency import tfr_array_multitaper
+    from mne.time_frequency import tfr_array_multitaper, tfr_array_morlet
 
     # define hyperparameters
     if freq_spacing == 'lin':
@@ -157,10 +157,14 @@ def compute_tfr(lfp, fs, freqs, freq_spacing='lin', time_window_length=0.5,
     time_bandwidth =  time_window_length * freq_bandwidth # must be >= 2
 
     # TF decomposition using multitapers
-    tfr = tfr_array_multitaper(lfp, sfreq=fs, freqs=freq, n_cycles=n_cycles, 
-                                time_bandwidth=time_bandwidth, output=output, 
-                                n_jobs=n_jobs, decim=decim, verbose=verbose)
-
+    if method == 'multitaper':
+        tfr = tfr_array_multitaper(lfp, sfreq=fs, freqs=freq, n_cycles=n_cycles, 
+                                    time_bandwidth=time_bandwidth, output=output, 
+                                    n_jobs=n_jobs, decim=decim, verbose=verbose)
+    elif method == 'morlet':
+        tfr = tfr_array_morlet(lfp, sfreq=fs, freqs=freq, n_cycles=n_morlet_cycle, 
+                               output=output, n_jobs=n_jobs, decim=decim, 
+                               verbose=verbose)
     return tfr, freq
 
 
