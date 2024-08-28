@@ -14,8 +14,6 @@ from utils import set_data_root, compute_exponents
 from allen_utils import get_lfp_epochs
 from tfr_utils import compute_tfr
 
-# settings
-
 
 def main():
     # Set file location based on platform.
@@ -25,10 +23,8 @@ def main():
     manifest_path = os.path.join(data_root, "allen-brain-observatory/visual-coding-neuropixels/ecephys-cache/manifest.json")
     cache = EcephysProjectCache.from_warehouse(manifest=manifest_path)
     
-    # Initiailize results dataframe
-    """
-    <INITIALIZE RESULTS DATAFRAME>
-    """
+    # initiailize results
+    df_list = []
     
     # loop through sessions of interest
     for session_id in SESSIONS:
@@ -37,8 +33,8 @@ def main():
         
         # loop through regions of interest
         for brain_structure in BRAIN_STRUCTURES:
-            # Extract LFP features -----------------------------------------------------
-            # Get LFP events
+            # extract LFP features -----------------------------------------------------
+            # get LFP events
             lfp_epochs, time = get_lfp_epochs(session_data, brain_structure='VISp', fs=FS_LFP)
 
             # compute tfr
@@ -53,16 +49,29 @@ def main():
             <EXTRACT LFP FEATURES>
             """
 
-            
-            # Extract Spike Features ----------------------------------------------------
+            # extract Spike Features ----------------------------------------------------
             """
             <EXTRACT SPIKE FEATURES>
             """
+            
+            # store results --------------------------------------------------------=----
+            df = pd.DataFrame({
+                'session_id': [session_id]*1800,
+                'region': [region]*1800,
+                'sweep': np.repeat(np.arange(2), 900),
+                'trial': np.repeat(np.arange(30), 60),
+                'bin': np.tile(np.arange(30), 60)})
+            df['exponent'] = exponent
+            
+            """
+            <ADD FEATURES TO DF>
+            """
+            
+            df_list.append(df)
     
-    # Save results
-    """
-    <SAVE RESULTS>
-    """
+    # save results
+    results = pd.concat(df_list)
 
+    
 if __name__ == '__main__':
     main()
