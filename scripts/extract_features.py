@@ -3,12 +3,14 @@ Extract LFP and spike features
 """
 
 # imports - general
+import os
 import numpy as np
+import pandas as pd
 from allensdk.brain_observatory.ecephys.ecephys_project_cache import EcephysProjectCache
 
 # imports - custom
 import sys
-sys.path.append("../code")
+sys.path.append("code")
 from settings import SESSIONS, BRAIN_STRUCTURES, FS_LFP, MOVIE_DURATION, FREQS, FREQ_BANDWIDTH, TIME_WINDOW_LENGTH, SPECPARAM_SETTINGS, N_JOBS, FRAMES_PER_TRIAL, TOTAL_TRIALS, BIN_DURATION
 from utils import set_data_root, compute_exponents
 from allen_utils import get_lfp_epochs
@@ -60,11 +62,11 @@ def main():
             
             # store results --------------------------------------------------------=----
             df = pd.DataFrame({
-                'session_id': [session_id]*1800,
-                'region': [region]*1800,
-                'sweep': np.repeat(np.arange(2), 900),
-                'trial': np.repeat(np.arange(30), 60),
-                'bin': np.tile(np.arange(30), 60)})
+                'session_id'     : [session_id]*1800,
+                'brain_structure': [brain_structure]*1800,
+                'sweep'          : np.repeat(np.arange(2), 900),
+                'trial'          : np.repeat(np.arange(30), 60),
+                'bin'            : np.tile(np.arange(30), 60)})
             df['exponent'] = exponent
             df['burst_count'] = burst_df['burst_count']
             
@@ -73,9 +75,12 @@ def main():
             """
             
             df_list.append(df)
+            break # TEMP!            
+        break # TEMP!
     
     # save results
     results = pd.concat(df_list)
+    results.to_csv('data/feature_df.csv')
 
     
 if __name__ == '__main__':
