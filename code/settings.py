@@ -16,6 +16,11 @@ BRAIN_STRUCTURES = ['LGd', 'VISp', 'VISl']
 # general settings
 BIN_DURATION = 0.5 # Seconds
 
+# spectrogram hyperparameters
+FREQS = [2, 100, 128] # [start, stop, n_freqs] (Hz)
+FREQ_BANDWIDTH = 4 # frequency smoothing (Hz)
+TIME_WINDOW_LENGTH = 1 # spectrogram bin size (s)
+
 # SpecParam hyperparameters
 SPECPARAM_SETTINGS = {
     'peak_width_limits' :   [2, 20], # default : (0.5, 12.0) - recommends at least frequency resolution * 2
