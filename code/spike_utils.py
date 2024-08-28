@@ -1,7 +1,7 @@
 """
 Spike analysis utility functions.
 
-Functions:
+FUNCTIONS:
 ----------
 - get_trial_stimuli: Processes movie presentations into trial-based stimuli data.
 - get_spikes_in_window: Extracts spike times within a specified time window.
@@ -11,7 +11,14 @@ Functions:
 - get_burst_counts: Calculates burst counts for each time bin across all trials and units.
 - get_session_bursts: Processes a session for a specific brain region, extracting burst information.
 
+EXAMPLE USAGE:
+-------------
+
+burst_df = get_session_bursts(session, region_acronym, FRAMES_PER_TRIAL, TOTAL_TRIALS, BIN_DURATION)
+
 """
+
+
 
 # imports
 import os
