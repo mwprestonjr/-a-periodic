@@ -35,7 +35,7 @@ def main():
         for brain_structure in BRAIN_STRUCTURES:
             # extract LFP features -----------------------------------------------------
             # get LFP events
-            lfp_epochs, time = get_lfp_epochs(session_data, brain_structure='VISp', fs=FS_LFP)
+            lfp_epochs, time = get_lfp_epochs(session_data, brain_structure=brain_structure, fs=FS_LFP)
 
             # compute tfr
             tfr_all, tfr_freqs = compute_tfr(lfp_epochs, FS_LFP, FREQS, freq_bandwidth=FREQ_BANDWIDTH,
