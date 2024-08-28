@@ -56,7 +56,7 @@ def main():
             """
 
             # extract Spike Features ----------------------------------------------------
-            burst_df = get_session_bursts(session_data, brain_structure, 
+            burst_df, spike_df = get_session_bursts(session_data, brain_structure, 
                                                     FRAMES_PER_TRIAL, TOTAL_TRIALS, 
                                                     BIN_DURATION)
             
@@ -73,7 +73,7 @@ def main():
                 'bin'            : np.tile(np.arange(30), 60)})
             df['exponent'] = exponent
             df['burst_count'] = burst_df['burst_count']
-
+            df['spike_count'] = spike_df['spike_count']
             
             """
             <ADD FEATURES TO DF>
