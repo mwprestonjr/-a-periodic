@@ -47,7 +47,7 @@ def main():
             tfr = np.mean(tfr_all, axis=1) # average over channels
             
             # compute aperiodic exponent
-            exponent = compute_exponents(tfr, freqs, SPECPARAM_SETTINGS, N_JOBS)
+            exponent = compute_exponents(tfr, tfr_freqs, SPECPARAM_SETTINGS, N_JOBS)
             
             """
             <EXTRACT LFP FEATURES>
