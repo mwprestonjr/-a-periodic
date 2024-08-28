@@ -38,23 +38,27 @@ def main():
         for brain_structure in BRAIN_STRUCTURES:
             # extract LFP features -----------------------------------------------------
             # get LFP events
-            lfp_epochs, time = get_lfp_epochs(session_data, brain_structure=brain_structure, fs=FS_LFP)
+            lfp_epochs, time = get_lfp_epochs(session_data, fs=FS_LFP,
+                                              brain_structure=brain_structure)
 
             # compute tfr
-            tfr_all, tfr_freqs = compute_tfr(lfp_epochs, FS_LFP, FREQS, freq_bandwidth=FREQ_BANDWIDTH,
-                                             time_window_length=TIME_WINDOW_LENGTH, decim=FS_LFP) # decim to 1 Hz
+            tfr_all, tfr_freqs = compute_tfr(lfp_epochs, FS_LFP, FREQS, decim=FS_LFP,
+                                             freq_bandwidth=FREQ_BANDWIDTH,
+                                             time_window_length=TIME_WINDOW_LENGTH, 
             tfr = np.mean(tfr_all, axis=1) # average over channels
             
-            # compute aperiodic exponent
-            exponent = compute_exponents(tfr, tfr_freqs, SPECPARAM_SETTINGS, N_JOBS)
+            # parameterize spectra and compute aperiodic exponent
+            fgs = apply_specparam(tfr, tfr_freqs, SPECPARAM_SETTINGS, N_JOBS)
+            exponent = fgs.get_params('aperiodic', 'exponent')
             
             """
             <EXTRACT LFP FEATURES>
             """
 
             # extract Spike Features ----------------------------------------------------
-            burst_df = get_session_bursts(session_data, brain_structure, FRAMES_PER_TRIAL, 
-                                          TOTAL_TRIALS, BIN_DURATION)
+            burst_df = get_session_bursts(session_data, brain_structure, 
+                                                    FRAMES_PER_TRIAL, TOTAL_TRIALS, 
+                                                    BIN_DURATION)
             
             """
             <EXTRACT SPIKE FEATURES>
@@ -69,13 +73,14 @@ def main():
                 'bin'            : np.tile(np.arange(30), 60)})
             df['exponent'] = exponent
             df['burst_count'] = burst_df['burst_count']
+
             
             """
             <ADD FEATURES TO DF>
             """
             
             df_list.append(df)
-            break # TEMP!            
+            # break # TEMP!            
         break # TEMP!
     
     # save results

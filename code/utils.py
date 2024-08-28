@@ -33,9 +33,9 @@ def set_data_root():
     return data_root
 
 
-def compute_exponents(spectra, freqs, specparam_settings, n_jobs=-1):
+def apply_specparam(spectra, freqs, specparam_settings, n_jobs=-1):
     """
-    Compute the aperiodic exponent for each power spectrum in a 3D array.
+    Apply spectral parameterization to 3D array of power spectra.
 
     Parameters
     ----------
@@ -63,8 +63,5 @@ def compute_exponents(spectra, freqs, specparam_settings, n_jobs=-1):
     fg = SpectralGroupModel(**specparam_settings)
     fgs = fit_models_3d(fg, freqs, spectra_rs, n_jobs=n_jobs)
     fgs = combine_model_objs(fgs)
-    exponent = fgs.get_params('aperiodic', 'exponent')
-    # exponent = np.reshape(exponent, [spectra.shape[0], spectra.shape[2]]) # reshape to input dims
     
-    return exponent
-    
+    return fgs
