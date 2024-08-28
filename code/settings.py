@@ -4,9 +4,10 @@ Settings and dataset details
 """
 
 # dataset details
-FS_LFP = 1250 # approximate sampling frequency
-FRAMES_PER_TRIAL = 900
-TOTAL_TRIALS = 60
+FS_LFP = 1250 # approximate sampling frequency for LFP
+MOVIE_DURATION = 30 # natural movies (Functional Connectivity)
+FRAMES_PER_TRIAL = 900 # natural movies (Functional Connectivity)
+TOTAL_TRIALS = 60 # natural movies (Functional Connectivity)
 
 # data of interest
 SESSIONS = [766640955, 768515987, 778240327, 821695405, 835479236, 839068429, 839557629] #ids (NOT SESSION_IDS)
