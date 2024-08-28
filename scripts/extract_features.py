@@ -80,7 +80,7 @@ def main():
     
     # save results
     results = pd.concat(df_list)
-    results.to_csv('data/feature_df.csv')
+    results.to_csv('data/feature_df.csv', index=False)
 
     
 if __name__ == '__main__':
