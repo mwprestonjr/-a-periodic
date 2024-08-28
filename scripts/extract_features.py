@@ -11,8 +11,8 @@ from allensdk.brain_observatory.ecephys.ecephys_project_cache import EcephysProj
 # imports - custom
 import sys
 sys.path.append("code")
-from settings import SESSIONS, BRAIN_STRUCTURES, FS_LFP, MOVIE_DURATION, FREQS, FREQ_BANDWIDTH, TIME_WINDOW_LENGTH, SPECPARAM_SETTINGS, N_JOBS, FRAMES_PER_TRIAL, TOTAL_TRIALS, BIN_DURATION
-from utils import set_data_root, apply_specparam
+from settings import *
+from utils import set_data_root, apply_specparam, compute_flattened_spectra
 from allen_utils import get_lfp_epochs
 from tfr_utils import compute_tfr
 from spike_utils import get_session_bursts
@@ -47,9 +47,10 @@ def main():
                                              time_window_length=TIME_WINDOW_LENGTH)
             tfr = np.mean(tfr_all, axis=1) # average over channels
             
-            # parameterize spectra and compute aperiodic exponent
+            # parameterize spectra, compute aperiodic exponent, and flattened spectra
             sgm = apply_specparam(tfr, tfr_freqs, SPECPARAM_SETTINGS, N_JOBS)
             exponent = sgm.get_params('aperiodic', 'exponent')
+            tfr_flat = compute_flattened_spectra(sgm)
             
             """
             <EXTRACT LFP FEATURES>
