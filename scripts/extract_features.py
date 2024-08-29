@@ -20,6 +20,7 @@ from utils import set_data_root, apply_specparam, compute_flattened_spectra
 from allen_utils import get_lfp_epochs
 from tfr_utils import compute_tfr
 from spike_utils import get_session_bursts
+from se_utils import extract_se
 
 
 def main():
@@ -56,17 +57,12 @@ def main():
             exponent = sgm.get_params('aperiodic', 'exponent')
             tfr_flat = compute_flattened_spectra(sgm)
             
-            """
-            <EXTRACT LFP FEATURES>
-            """
+            # extract spectral events
+            se_df = extract_se(tfr, FREQS_SE)
 
             # extract Spike Features ----------------------------------------------------
             spike_df = get_session_bursts(session_data, brain_structure, FRAMES_PER_TRIAL, 
                                           TOTAL_TRIALS, BIN_DURATION)
-            
-            """
-            <EXTRACT SPIKE FEATURES>
-            """
             
             # store results --------------------------------------------------------=----
             df = pd.DataFrame({
@@ -79,13 +75,11 @@ def main():
             df['total_power'] = np.ravel(np.mean(tfr, axis=1))
             for feature in df.columns[2:]:
                 df[feature] = spike_df[feature]
-            
-            """
-            <ADD FEATURES TO DF>
-            """
-            
+            for feature_in, feature in zip([["Peak Frequency", "Event Duration", "Normalized Peak Power"], 
+                                            ["peak_frequency", "event_duration", "normalized_peak_power"]])
+                df[feature] = se_df[feature_in]
             df_list.append(df)
-            # break # TEMP!            
+            break # TEMP!         
         break # TEMP!
     
     # save results
