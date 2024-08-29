@@ -23,8 +23,9 @@ WINDOW_SIZE = 1 # Rolling bin window for overlapping bursts
 
 # spectrogram hyperparameters
 FREQS = [2, 100, 128] # [start, stop, n_freqs] (Hz)
-FREQ_BANDWIDTH = 4 # frequency smoothing (Hz)
+FREQ_BANDWIDTH = 4 # frequency smoothing (Hz) for multitaper [currently deprecated]
 TIME_WINDOW_LENGTH = 1 # spectrogram bin size (s)
+N_CYCLES = 5 # for Morlet decomp
 
 # SpecParam hyperparameters
 SPECPARAM_SETTINGS = {
@@ -37,5 +38,3 @@ N_JOBS = -1 # number of jobs for parallel processing
 
 # SpectralEvents hyperparameters
 EVENT_BAND = [2, 20] # where to look for events
-FREQS_SE = FREQS # TEMP - should refactor and compute tfr only once in extract_features()
-N_CYCLES = 2 # TEMP - should refactor and compute tfr only once in extract_features()

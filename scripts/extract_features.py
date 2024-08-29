@@ -55,12 +55,21 @@ def main():
                                               brain_structure=brain_structure)
 
             # compute tfr
-            tfr_all, tfr_freqs = compute_tfr(lfp_epochs, FS_LFP, FREQS, decim=FS_LFP,
-                                             freq_bandwidth=FREQ_BANDWIDTH,
-                                             time_window_length=TIME_WINDOW_LENGTH)
-            tfr = np.mean(tfr_all, axis=1) # average over channels
+            tfr, tfr_freqs = compute_tfr(lfp_epochs, FS_LFP, FREQS, method='morlet', 
+                                         n_morlet_cycle=N_CYCLES, n_jobs=N_JOBS)
             
-            # parameterize spectra, compute aperiodic exponent and total power, and 
+            # average over channels and reshape for extract_se
+            tfr = np.mean(tfr, axis=1)
+            tfr = tfr.reshape(tfr.shape[0], tfr.shape[1], int(tfr.shape[-1] / FS_LFP), FS_LFP)
+            
+            # extract spectral events
+            se_df = extract_se(tfr, FREQS, event_band=EVENT_BAND, fs=FS_LFP, n_jobs=N_JOBS)
+            for feature_in, feature in zip(["Peak Frequency", "Event Duration", "Normalized Peak Power"],
+                                           ["peak_frequency", "event_duration", "normalized_peak_power"]):
+                df[feature] = se_df[feature_in]
+            
+            # parameterize spectra, compute aperiodic exponent and total power
+            tfr = tfr.mean(axis=3) # average over 1 second bins
             sgm = apply_specparam(tfr, tfr_freqs, SPECPARAM_SETTINGS, N_JOBS)
             exponent = sgm.get_params('aperiodic', 'exponent')
             df['exponent'] = exponent            
@@ -68,13 +77,6 @@ def main():
             
             # flattened spectra
             # tfr_flat = compute_flattened_spectra(sgm)
-            
-            # extract spectral events
-            # se_df = extract_se(lfp_epochs, FREQS_SE, event_band=EVENT_BAND, fs=FS_LFP, 
-            #                    n_cycles=N_CYCLES, n_jobs=N_JOBS)
-            # for feature_in, feature in zip([["Peak Frequency", "Event Duration", "Normalized Peak Power"], 
-            #                                 ["peak_frequency", "event_duration", "normalized_peak_power"]]):
-            #     df[feature] = se_df[feature_in]
 
             # extract Spike Features ----------------------------------------------------
             spike_df = get_session_bursts(session_data, brain_structure, FRAMES_PER_TRIAL, 
@@ -83,14 +85,18 @@ def main():
             for feature in spike_df.columns[2:]:
                 df[feature] = spike_df[feature]
 
+            # save intermediateresults
+            df.to_csv(f'results/features_{session_id}.csv', index=False)
+            
             # store results
             df_list.append(df)
-            # break # TEMP!         
-        # break # TEMP!
+            
+            break # TEMP!         
+        break # TEMP!
     
     # save results
     results = pd.concat(df_list)
-    results.to_csv('data/feature_df.csv', index=False)
+    results.to_csv('results/feature_df.csv', index=False)
 
     
 if __name__ == '__main__':
