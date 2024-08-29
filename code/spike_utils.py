@@ -494,13 +494,15 @@ def get_session_bursts(session, region_acronym, FRAMES_PER_TRIAL, TOTAL_TRIALS, 
         burst_params['min_IBI'] = 0.1
         burst_params['min_burst_duration'] = 0.01
         burst_params['min_spikes_in_burst'] = 3
+        burst_params['pre_burst_silence'] = 0.1
     else:
         burst_params['max_begin_ISI'] = 0.17 
         burst_params['max_end_ISI'] = 0.3 
         burst_params['min_IBI'] = 0.2
         burst_params['min_burst_duration'] = 0.01
         burst_params['min_spikes_in_burst'] = 3
-    
+        burst_params['pre_burst_silence'] = 0.1
+
      # Extract spike counts across all units across all trials
     spike_df = get_spike_counts(trial_spikes, trials_df, BIN_DURATION)
     
