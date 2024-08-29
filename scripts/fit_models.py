@@ -21,15 +21,15 @@ Y_STRUCTURE = 'VISp'
 
 def main():
     # load results and reformat 
-    results = pd.read_csv('C:/users/micha/downloads/feature_df.csv')
+    results = pd.read_csv('results/feature_df.csv')
     df = results.pivot_table(index=['session_id','sweep','trial','bin'], 
                              values=['exponent', 'burst_count','spike_count'], 
                              columns='brain_structure').reset_index()
 
     # loop over sessions - fit model for each session
-    for session in SESSIONS:
+    for session_id in SESSIONS:
         # get data for one session
-        df_s = df[df['session_id'] == session]
+        df_s = df[df['session_id'] == session_id]
         y = df[Y_FEATURE][Y_STRUCTURE].values
         X = df[X_FEATURES].values
 
