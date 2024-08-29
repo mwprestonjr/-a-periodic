@@ -14,7 +14,12 @@ FUNCTIONS:
 EXAMPLE USAGE:
 -------------
 
-burst_df, spike_df = get_session_bursts(session, region_acronym, FRAMES_PER_TRIAL, TOTAL_TRIALS, BIN_DURATION)
+spike_df, burst_df, network_burst_df = get_session_bursts(session, region_acronym, FRAMES_PER_TRIAL, TOTAL_TRIALS, BIN_DURATION, OVERLAP_THRESHOLD, WINDOW_SIZE)
+    Returns:
+    spike_df: DataFrame containing spike counts for each bin in each trial.
+    burst_df: DataFrame containing burst counts for each bin in each trial.
+    network_burst_df: DataFrame containing whether network burst happened and proportion of units bursting for each bin in each trial.
+
 
 """
 
@@ -444,7 +449,7 @@ def get_network_burst_counts(burst_times, trials_df, bin_duration, overlap_thres
     return pd.DataFrame(network_burst_data)
 
 
-def get_session_bursts(session, region_acronym, FRAMES_PER_TRIAL, TOTAL_TRIALS, BIN_DURATION):
+def get_session_bursts(session, region_acronym, FRAMES_PER_TRIAL, TOTAL_TRIALS, BIN_DURATION, OVERLAP_THRESHOLD, WINDOW_SIZE):
     """
     Process a session for a specific brain region, extracting burst information.
 
@@ -456,7 +461,9 @@ def get_session_bursts(session, region_acronym, FRAMES_PER_TRIAL, TOTAL_TRIALS, 
     BIN_DURATION (float): Duration of each bin for burst counting.
 
     Returns:
-    pd.DataFrame: DataFrame containing burst counts for each bin in each trial.
+    spike_df: DataFrame containing spike counts for each bin in each trial.
+    burst_df: DataFrame containing burst counts for each bin in each trial.
+    network_burst_df: DataFrame containing whether network burst happened and proportion of units bursting for each bin in each trial.
     """
     # Load units in region for this session
     region_units = session.units[session.units.ecephys_structure_acronym == region_acronym]
@@ -494,13 +501,16 @@ def get_session_bursts(session, region_acronym, FRAMES_PER_TRIAL, TOTAL_TRIALS, 
         burst_params['min_burst_duration'] = 0.01
         burst_params['min_spikes_in_burst'] = 3
     
+     # Extract spike counts across all units across all trials
+    spike_df = get_spike_counts(trial_spikes, trials_df, BIN_DURATION)
+    
     # Extract burst start and stop times across trials
     burst_times = get_burst_times(trial_spikes, trials_df, burst_params)
     
     # Extract burst counts across all units across all trials
     burst_df = get_burst_counts(burst_times, trials_df, BIN_DURATION)
 
-    # Extrat spike counts across all units across all trials
-    spike_df = get_spike_counts(trial_spikes, trials_df, BIN_DURATION)
+    # Extract network bursts across all bins across all trials
+    network_burst_df = get_network_burst_counts(burst_times, trials_df, BIN_DURATION, OVERLAP_THRESHOLD, WINDOW_SIZE)
     
-    return burst_df, spike_df
+    return  spike_df, burst_df, network_burst_df
