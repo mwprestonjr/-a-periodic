@@ -85,7 +85,7 @@ def main():
             
             # flattened spectra
             tfr_flat = compute_flattened_spectra(sgm)
-            np.save(tfr_flat, f'results/tfr/{session_id}_{brain_structure}.npy')
+            np.save(f'results/tfr/{session_id}_{brain_structure}.npy', tfr_flat)
             del tfr_flat
         
             # extract Spike Features ----------------------------------------------------
