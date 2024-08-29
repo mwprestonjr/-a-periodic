@@ -489,17 +489,17 @@ def get_session_bursts(session, region_acronym, FRAMES_PER_TRIAL, TOTAL_TRIALS, 
     # Define Burst Parameters
     burst_params = {}
     if region_acronym == 'LGd':
-        burst_params['max_begin_ISI'] = 0.04
-        burst_params['max_end_ISI'] = 0.1
-        burst_params['min_IBI'] = 0.1
-        burst_params['min_burst_duration'] = 0.01
-        burst_params['min_spikes_in_burst'] = 3
+        burst_params['max_begin_ISI'] = 0.004  # 4 ms, corresponding to >250 Hz
+        burst_params['max_end_ISI'] = 0.02    # 4 ms, to maintain consistency within the burst
+        burst_params['min_IBI'] = 0.1          # 100 ms of AP quiescence before a burst
+        burst_params['min_burst_duration'] = 0.008  # Minimum duration for 3 spikes at 4 ms intervals
+        burst_params['min_spikes_in_burst'] = 3  # Minimum number of spikes to constitute a burst
         burst_params['pre_burst_silence'] = 0.1
     else:
-        burst_params['max_begin_ISI'] = 0.17 
-        burst_params['max_end_ISI'] = 0.3 
+        burst_params['max_begin_ISI'] = 0.004
+        burst_params['max_end_ISI'] = 0.1
         burst_params['min_IBI'] = 0.2
-        burst_params['min_burst_duration'] = 0.01
+        burst_params['min_burst_duration'] = 0.02
         burst_params['min_spikes_in_burst'] = 3
         burst_params['pre_burst_silence'] = 0.1
 
