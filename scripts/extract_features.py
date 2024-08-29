@@ -58,10 +58,9 @@ def main():
             tfr, tfr_freqs = compute_tfr(lfp_epochs, FS_LFP, FREQS, method='morlet', 
                                          n_morlet_cycle=N_CYCLES, n_jobs=N_JOBS)
             
-            # average over channels, and 1 second bins
+            # average over channels and reshape for extract_se
             tfr = np.mean(tfr, axis=1)
             tfr = tfr.reshape(tfr.shape[0], tfr.shape[1], int(tfr.shape[-1] / FS_LFP), FS_LFP)
-            tfr = tfr.mean(axis=3)
             
             # extract spectral events
             se_df = extract_se(tfr, FREQS, event_band=EVENT_BAND, fs=FS_LFP, n_jobs=N_JOBS)
@@ -70,6 +69,7 @@ def main():
                 df[feature] = se_df[feature_in]
             
             # parameterize spectra, compute aperiodic exponent and total power
+            tfr = tfr.mean(axis=3) # average over 1 second bins
             sgm = apply_specparam(tfr, tfr_freqs, SPECPARAM_SETTINGS, N_JOBS)
             exponent = sgm.get_params('aperiodic', 'exponent')
             df['exponent'] = exponent            
