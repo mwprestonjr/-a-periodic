@@ -21,9 +21,12 @@ from allen_utils import get_lfp_epochs
 from tfr_utils import compute_tfr
 from spike_utils import get_session_bursts
 from se_utils import extract_se
-
+from time_utils import get_start_time, print_time_elapsed
 
 def main():
+    # start timer
+    t_start = get_start_time()
+    
     # Set file location based on platform.
     data_root = set_data_root()
 
@@ -41,6 +44,10 @@ def main():
         
         # loop through regions of interest
         for brain_structure in BRAIN_STRUCTURES:
+            # display progress - time it
+            t_start_s = get_start_time()
+            print(f"\n Analyzing session: {session_id}, region: {brain_structure}")
+            
             # store results --------------------------------------------------------=----
             df = pd.DataFrame({
                 'session_id'     : [session_id]*1800,
@@ -91,13 +98,19 @@ def main():
             # store results
             df_list.append(df)
             
-            break # TEMP!         
-        break # TEMP!
+            # display progress
+            print_time_elapsed(t_start_s, "Session/structure complete in: "
+            
+        #     break # TEMP!         
+        # break # TEMP!
     
     # save results
     results = pd.concat(df_list)
     results.to_csv('results/feature_df.csv', index=False)
+                               
+    # display progress
+    print_time_elapsed(t_start, "\n\nTotal analysis time: "
 
-    
+
 if __name__ == '__main__':
     main()
