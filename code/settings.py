@@ -17,7 +17,8 @@ BRAIN_STRUCTURES = ['LGd', 'VISp', 'VISl']
 BIN_DURATION = 0.5 # Seconds
 
 # network burst parameters
-OVERLAP_THRESHOLD = 0.25 # percentage of units whose burst times must overlap to count as a "network burst"
+OVERLAP_THRESHOLD = 0.02 # percentage of units whose burst times must overlap to count as a "network burst"
+WINDOW_SIZE = 1 # Rolling bin window for overlapping bursts
 
 # spectrogram hyperparameters
 FREQS = [2, 100, 128] # [start, stop, n_freqs] (Hz)
