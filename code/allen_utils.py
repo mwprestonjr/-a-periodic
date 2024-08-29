@@ -41,7 +41,7 @@ def get_lfp_epochs(session_data, brain_structure, fs=1250):
     import xarray as xr
 
     # identify probes in ROI
-    print(f"Finding data for {brain_structure}...")
+    print(f"Finding LFP data for {brain_structure}...")
     probe_ids, _ = find_probes_in_region(session_data, brain_structure)
 
     # check data, print status

@@ -46,7 +46,7 @@ def main():
         for brain_structure in BRAIN_STRUCTURES:
             # display progress - time it
             t_start_s = get_start_time()
-            print(f"\n Analyzing session: {session_id}, region: {brain_structure}")
+            print(f"\nAnalyzing session: {session_id}, region: {brain_structure} -----------------")
             
             # store results --------------------------------------------------------=----
             df = pd.DataFrame({
@@ -62,6 +62,7 @@ def main():
                                               brain_structure=brain_structure)
 
             # compute tfr
+            print('Extracting LFP features...')
             tfr, tfr_freqs = compute_tfr(lfp_epochs, FS_LFP, FREQS, method='morlet', 
                                          n_morlet_cycle=N_CYCLES, n_jobs=N_JOBS)
             
@@ -86,6 +87,7 @@ def main():
             # tfr_flat = compute_flattened_spectra(sgm)
 
             # extract Spike Features ----------------------------------------------------
+            print('Extracting spike features...')
             spike_df = get_session_bursts(session_data, brain_structure, FRAMES_PER_TRIAL, 
                                           TOTAL_TRIALS, BIN_DURATION, OVERLAP_THRESHOLD, 
                                           WINDOW_SIZE)
