@@ -475,8 +475,8 @@ def get_session_bursts(session, region_acronym, FRAMES_PER_TRIAL, TOTAL_TRIALS, 
     
     # print(f'Working with session: {session.ecephys_session_id}')
     print(f'Extracting bursts for region: {region_acronym}')
-    print(f'    Total units in session: {units.shape[0]}')
-    print(f'    Total units in {region_acronym}: {region_units.shape[0]}')
+    print(f'  Total units in session: {units.shape[0]}')
+    print(f'  Total units in {region_acronym}: {region_units.shape[0]}')
     
     # Get trial stimuli time stamps
     stimuli_frames_df, trials_df = get_trial_stimuli(movie_presentations, FRAMES_PER_TRIAL, TOTAL_TRIALS)
