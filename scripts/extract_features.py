@@ -93,13 +93,13 @@ def main():
                 df[feature] = spike_df[feature]
 
             # save intermediateresults
-            df.to_csv(f'results/features_{session_id}.csv', index=False)
+            df.to_csv(f'results/features_{session_id}_{brain_structure}.csv', index=False)
             
             # store results
             df_list.append(df)
             
             # display progress
-            print_time_elapsed(t_start_s, "Session/structure complete in: "
+            print_time_elapsed(t_start_s, "Session/structure complete in: ")
             
         #     break # TEMP!         
         # break # TEMP!
@@ -109,7 +109,7 @@ def main():
     results.to_csv('results/feature_df.csv', index=False)
                                
     # display progress
-    print_time_elapsed(t_start, "\n\nTotal analysis time: "
+    print_time_elapsed(t_start, "\n\nTotal analysis time: ")
 
 
 if __name__ == '__main__':
