@@ -32,7 +32,7 @@ import pandas as pd
 from collections import deque
 from settings import SESSIONS, BRAIN_STRUCTURES, FRAMES_PER_TRIAL, TOTAL_TRIALS, BIN_DURATION, OVERLAP_THRESHOLD, WINDOW_SIZE
 
-def trial_stimuli(movie_presentations, FRAMES_PER_TRIAL, TOTAL_TRIALS):
+def get_trial_stimuli(movie_presentations, FRAMES_PER_TRIAL, TOTAL_TRIALS):
     """
     Process movie presentations into trial-based stimuli data.
 
