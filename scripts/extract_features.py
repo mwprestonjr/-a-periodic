@@ -58,7 +58,8 @@ def main():
             tfr_flat = compute_flattened_spectra(sgm)
             
             # extract spectral events
-            se_df = extract_se(tfr, FREQS_SE, n_cycles=N_CYCLES, n_jobs=N_JOBS)
+            se_df = extract_se(lfp_epochs, FREQS_SE, event_band=EVENT_BAND, fs=FS_LFP, 
+                               n_cycles=N_CYCLES, n_jobs=N_JOBS)
 
             # extract Spike Features ----------------------------------------------------
             spike_df = get_session_bursts(session_data, brain_structure, FRAMES_PER_TRIAL, 

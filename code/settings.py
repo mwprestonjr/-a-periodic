@@ -35,5 +35,6 @@ SPECPARAM_SETTINGS = {
 N_JOBS = -1 # number of jobs for parallel processing
 
 # SpectralEvents hyperparameters
+EVENT_BAND = [2, 20] # where to look for events
 FREQS_SE = FREQS # TEMP - should refactor and compute tfr only once in extract_features()
 N_CYCLES = 2 # TEMP - should refactor and compute tfr only once in extract_features()
