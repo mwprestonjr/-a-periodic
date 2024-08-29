@@ -55,25 +55,20 @@ def main():
                                               brain_structure=brain_structure)
 
             # compute tfr
-            tfr_all, tfr_freqs = compute_tfr(lfp_epochs, FS_LFP, FREQS, decim=1.,
+            tfr, tfr_freqs = compute_tfr(lfp_epochs, FS_LFP, FREQS, decim=1.,
                                              method='morlet', n_morlet_cycle=5, n_jobs=N_JOBS)
             
-            
-            tfr = np.mean(tfr_all, axis=1) # average over channels
-            
-            tfr_epoch = tfr.reshape(tfr.shape[0],tfr.shape[1],int(tfr.shape[-1] / FS_LFP), FS_LFP)
+            # average over channels, and 1 second bins
+            tfr = np.mean(tfr, axis=1)
+            tfr = tfr.reshape(tfr.shape[0],tfr.shape[1],int(tfr.shape[-1] / FS_LFP), FS_LFP)
+            tfr = tfr.mean(axis=3)
             
             # spectral events
-            se_df = extract_se(tfr_epoch,FREQ)
-            
-            del tfr, tfr_all
+            se_df = extract_se(tfr, FREQ)
             
             for feature_in, feature in zip([["Peak Frequency", "Event Duration", "Normalized Peak Power"],
                                             ["peak_frequency", "event_duration", "normalized_peak_power"]]):
                 df[feature] = se_df[feature_in]
-            
-            # decim TFR for spec param
-            tfr = tfr_epoch.mean(axis=3)
             
             # parameterize spectra, compute aperiodic exponent and total power, and 
             sgm = apply_specparam(tfr, tfr_freqs, SPECPARAM_SETTINGS, N_JOBS)
