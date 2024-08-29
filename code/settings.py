@@ -33,3 +33,6 @@ SPECPARAM_SETTINGS = {
     'peak_threshold'    :   3, # default : 2.0
     'aperiodic_mode'    :   'knee'} # 'fixed' or 'knee'
 N_JOBS = -1 # number of jobs for parallel processing
+
+# SpectralEvents hyperparameters
+FREQS_SE = FREQS # TEMP - should refactor and compute tfr only once in extract_features()
