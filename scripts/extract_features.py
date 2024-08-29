@@ -64,8 +64,8 @@ def main():
             
             # extract spectral events
             se_df = extract_se(tfr, FREQS, event_band=EVENT_BAND, fs=FS_LFP, n_jobs=N_JOBS)
-            for feature_in, feature in zip([["Peak Frequency", "Event Duration", "Normalized Peak Power"],
-                                            ["peak_frequency", "event_duration", "normalized_peak_power"]]):
+            for feature_in, feature in zip(["Peak Frequency", "Event Duration", "Normalized Peak Power"],
+                                           ["peak_frequency", "event_duration", "normalized_peak_power"]):
                 df[feature] = se_df[feature_in]
             
             # parameterize spectra, compute aperiodic exponent and total power
