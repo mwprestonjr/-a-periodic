@@ -55,8 +55,8 @@ def main():
                                               brain_structure=brain_structure)
 
             # compute tfr
-            tfr, tfr_freqs = compute_tfr(lfp_epochs, FS_LFP, FREQS, decim=1.,
-                                             method='morlet', n_morlet_cycle=5, n_jobs=N_JOBS)
+            tfr, tfr_freqs = compute_tfr(lfp_epochs, FS_LFP, FREQS, method='morlet', 
+                                         n_morlet_cycle=N_CYCLES, n_jobs=N_JOBS)
             
             # average over channels, and 1 second bins
             tfr = np.mean(tfr, axis=1)
