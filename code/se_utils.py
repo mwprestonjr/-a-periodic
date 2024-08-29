@@ -21,7 +21,7 @@ def events_to_pd(events):
     return event_df
 
 
-def extract_se(tfr_epoch, freqs, event_band=[2, 20], fs=1250, n_cycles=5.0, n_jobs=10):
+def extract_se(tfr_epoch, freqs, event_band=[2, 20], fs=1250, n_jobs=10):
     
     import sys
     sys.path.append('SpectralEvents')
@@ -40,11 +40,8 @@ def extract_se(tfr_epoch, freqs, event_band=[2, 20], fs=1250, n_cycles=5.0, n_jo
         frequency range of the TFR used as input to linspace (start, stop, num)
     event_band : list
         range of frequencies for which events should be identified
-
     fs : float
         Sampling rate (for Allen LFP 1250)
-    n_cycles : float
-        number of cycles for the Morlet wavelet TFR
     n_jobs : int
         number of jobs for parallelization (-1 if no parallelization)
 
