@@ -149,13 +149,14 @@ def align_lfp(lfp, event_times, t_window=[-1,1], dt=0.001):
 
 def load_project_cache():
     # imports
-    from utils import set_data_root()
+    from allensdk.brain_observatory.ecephys.ecephys_project_cache import EcephysProjectCache
+    from utils import set_data_root
     
     # Set file location based on platform.
     data_root = set_data_root()
 
     # load project cache
-    manifest_path = os.path.join(data_root, "allen-brain-observatory/visual-coding-neuropixels/ecephys-cache/manifest.json")
+    manifest_path = f"{data_root}/allen-brain-observatory/visual-coding-neuropixels/ecephys-cache/manifest.json"
     cache = EcephysProjectCache.from_warehouse(manifest=manifest_path)
     
     return cache

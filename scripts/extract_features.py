@@ -10,7 +10,6 @@ warnings.filterwarnings("ignore")
 import os
 import numpy as np
 import pandas as pd
-from allensdk.brain_observatory.ecephys.ecephys_project_cache import EcephysProjectCache
 
 # imports - custom
 import sys
@@ -33,7 +32,7 @@ def main():
             os.makedirs(f"results/{folder}")
     
     # load project cache
-    cache = load_project_cache
+    cache = load_project_cache()
 
     # initiailize results
     df_list = []
