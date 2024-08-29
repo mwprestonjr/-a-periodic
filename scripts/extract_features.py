@@ -60,17 +60,16 @@ def main():
             
             # average over channels, and 1 second bins
             tfr = np.mean(tfr, axis=1)
-            tfr = tfr.reshape(tfr.shape[0],tfr.shape[1],int(tfr.shape[-1] / FS_LFP), FS_LFP)
+            tfr = tfr.reshape(tfr.shape[0], tfr.shape[1], int(tfr.shape[-1] / FS_LFP), FS_LFP)
             tfr = tfr.mean(axis=3)
             
-            # spectral events
+            # extract spectral events
             se_df = extract_se(tfr, FREQS, event_band=EVENT_BAND, fs=FS_LFP, n_jobs=N_JOBS)
-            
             for feature_in, feature in zip([["Peak Frequency", "Event Duration", "Normalized Peak Power"],
                                             ["peak_frequency", "event_duration", "normalized_peak_power"]]):
                 df[feature] = se_df[feature_in]
             
-            # parameterize spectra, compute aperiodic exponent and total power, and 
+            # parameterize spectra, compute aperiodic exponent and total power
             sgm = apply_specparam(tfr, tfr_freqs, SPECPARAM_SETTINGS, N_JOBS)
             exponent = sgm.get_params('aperiodic', 'exponent')
             df['exponent'] = exponent            
@@ -88,8 +87,8 @@ def main():
 
             # store results
             df_list.append(df)
-            # break # TEMP!         
-        # break # TEMP!
+            break # TEMP!         
+        break # TEMP!
     
     # save results
     results = pd.concat(df_list)
