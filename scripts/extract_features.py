@@ -66,7 +66,7 @@ def main():
             # spectral events
             se_df = extract_se(tfr_epoch,FREQ)
             
-            del tfr tfr_all
+            del tfr, tfr_all
             
             for feature_in, feature in zip([["Peak Frequency", "Event Duration", "Normalized Peak Power"],
                                             ["peak_frequency", "event_duration", "normalized_peak_power"]]):
