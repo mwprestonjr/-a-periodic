@@ -27,6 +27,11 @@ def main():
     # start timer
     t_start = get_start_time()
     
+    # create ouput dir
+    for folder in ['tfr', 'features']:
+        if not os.path.exists(f"results/{folder}"):
+            os.makedirs(f"results/{folder}")
+    
     # Set file location based on platform.
     data_root = set_data_root()
 
@@ -84,8 +89,10 @@ def main():
             df['total_power'] = np.ravel(np.mean(tfr, axis=1))
             
             # flattened spectra
-            # tfr_flat = compute_flattened_spectra(sgm)
-
+            tfr_flat = compute_flattened_spectra(sgm)
+            np.save(tfr_flat, f'results/tfr/{session_id}_{brain_structure}.npy')
+            del tfr_flat
+        
             # extract Spike Features ----------------------------------------------------
             print('Extracting spike features...')
             spike_df = get_session_bursts(session_data, brain_structure, FRAMES_PER_TRIAL, 
@@ -95,7 +102,7 @@ def main():
                 df[feature] = spike_df[feature]
 
             # save intermediateresults
-            df.to_csv(f'results/features_{session_id}_{brain_structure}.csv', index=False)
+            df.to_csv(f'results/features/{session_id}_{brain_structure}.csv', index=False)
             
             # store results
             df_list.append(df)
