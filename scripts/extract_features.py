@@ -85,14 +85,18 @@ def main():
             for feature in spike_df.columns[2:]:
                 df[feature] = spike_df[feature]
 
+            # save intermediateresults
+            df.to_csv(f'results/features_{session_id}.csv', index=False)
+            
             # store results
             df_list.append(df)
+            
             break # TEMP!         
         break # TEMP!
     
     # save results
     results = pd.concat(df_list)
-    results.to_csv('data/feature_df.csv', index=False)
+    results.to_csv('results/feature_df.csv', index=False)
 
     
 if __name__ == '__main__':
