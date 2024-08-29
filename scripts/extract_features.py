@@ -78,14 +78,15 @@ def main():
 
             # extract Spike Features ----------------------------------------------------
             spike_df = get_session_bursts(session_data, brain_structure, FRAMES_PER_TRIAL, 
-                                          TOTAL_TRIALS, BIN_DURATION)
+                                          TOTAL_TRIALS, BIN_DURATION, OVERLAP_THRESHOLD, 
+                                          WINDOW_SIZE)
             for feature in df.columns[2:]:
                 df[feature] = spike_df[feature]
 
             # store results
             df_list.append(df)
-            break # TEMP!         
-        break # TEMP!
+            # break # TEMP!         
+        # break # TEMP!
     
     # save results
     results = pd.concat(df_list)
