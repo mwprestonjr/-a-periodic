@@ -24,9 +24,10 @@ burst_df, spike_df = get_session_bursts(session, region_acronym, FRAMES_PER_TRIA
 import os
 import numpy as np
 import pandas as pd
-from settings import SESSIONS, BRAIN_STRUCTURES, FRAMES_PER_TRIAL, TOTAL_TRIALS, BIN_DURATION
+from collections import deque
+from settings import SESSIONS, BRAIN_STRUCTURES, FRAMES_PER_TRIAL, TOTAL_TRIALS, BIN_DURATION, OVERLAP_THRESHOLD, WINDOW_SIZE
 
-def get_trial_stimuli(movie_presentations, FRAMES_PER_TRIAL, TOTAL_TRIALS):
+def trial_stimuli(movie_presentations, FRAMES_PER_TRIAL, TOTAL_TRIALS):
     """
     Process movie presentations into trial-based stimuli data.
 
@@ -134,23 +135,25 @@ def get_trial_spikes(session, trials_df, region_acronym):
     return trial_spikes
 
 def maxInterval(spiketrain, max_begin_ISI, max_end_ISI, min_IBI, min_burst_duration,
-                min_spikes_in_burst):
+                min_spikes_in_burst, pre_burst_silence=0.1):
     
     allBurstData = {}
     '''
     Phase 1 - Burst Detection
     Here a burst is defined as starting when two consecutive spikes have an
-    ISI less than max_begin_ISI apart. The end of the burst is given when two
+    ISI less than max_begin_ISI apart, and there's at least pre_burst_silence
+    of no spikes before the burst. The end of the burst is given when two
     spikes have an ISI greater than max_end_ISI.
-    Find ISIs closer than max_begin_ISI and end with max_end_ISI.
-    The last spike of the previous burst will be used to calculate the IBI.
-    For the first burst, there is no previous IBI.
     '''
     inBurst = False
     burstNum = 0
     currentBurst = []
+    last_spike_time = -np.inf  # Initialize to negative infinity
+
     for n in range(1, len(spiketrain)):
         ISI = spiketrain[n] - spiketrain[n - 1]
+        time_since_last_spike = spiketrain[n - 1] - last_spike_time
+
         if inBurst:
             if ISI > max_end_ISI:  # end the burst
                 currentBurst = np.append(currentBurst, spiketrain[n - 1])
@@ -158,6 +161,7 @@ def maxInterval(spiketrain, max_begin_ISI, max_end_ISI, min_IBI, min_burst_durat
                 currentBurst = []
                 burstNum += 1
                 inBurst = False
+                last_spike_time = spiketrain[n - 1]
             elif (ISI < max_end_ISI) & (n == len(spiketrain) - 1):
                 currentBurst = np.append(currentBurst, spiketrain[n])
                 allBurstData[burstNum] = currentBurst
@@ -165,9 +169,12 @@ def maxInterval(spiketrain, max_begin_ISI, max_end_ISI, min_IBI, min_burst_durat
             else:
                 currentBurst = np.append(currentBurst, spiketrain[n - 1])
         else:
-            if ISI < max_begin_ISI:
+            if ISI < max_begin_ISI and time_since_last_spike >= pre_burst_silence:
                 currentBurst = np.append(currentBurst, spiketrain[n - 1])
                 inBurst = True
+            else:
+                last_spike_time = spiketrain[n - 1]
+
     # Calculate IBIs
     IBI = []
     for b in range(1, burstNum):
@@ -230,7 +237,7 @@ def get_burst_times(trial_spikes, trial_times, burst_params):
     for trial, units in trial_spikes.items():
         burst_times[trial] = {}
         for unit, spikes in units.items():
-            allBurstData, _ = maxInterval(np.array(spikes), burst_params['max_begin_ISI'], burst_params['max_end_ISI'], burst_params['min_IBI'], burst_params['min_burst_duration'], burst_params['min_spikes_in_burst'])
+            allBurstData, _ = maxInterval(np.array(spikes), burst_params['max_begin_ISI'], burst_params['max_end_ISI'], burst_params['min_IBI'], burst_params['min_burst_duration'], burst_params['min_spikes_in_burst'], burst_params['pre_burst_silence'])
             
             if allBurstData:  # If bursts were detected
                 burst_starts = [burst[0] for burst in allBurstData.values()]
@@ -303,66 +310,6 @@ def get_burst_counts(burst_times, trials_df, bin_duration):
     # Convert the list of dictionaries to a DataFrame and return it
     return pd.DataFrame(burst_data)
 
-def get_session_bursts(session, region_acronym, FRAMES_PER_TRIAL, TOTAL_TRIALS, BIN_DURATION):
-    """
-    Process a session for a specific brain region, extracting burst information.
-
-    Parameters:
-    session (object): Session object containing unit and stimulus information.
-    region_acronym (str): Acronym of the brain region to process.
-    FRAMES_PER_TRIAL (int): Number of frames in each trial.
-    TOTAL_TRIALS (int): Total number of trials to process.
-    BIN_DURATION (float): Duration of each bin for burst counting.
-
-    Returns:
-    pd.DataFrame: DataFrame containing burst counts for each bin in each trial.
-    """
-    # Load units in region for this session
-    region_units = session.units[session.units.ecephys_structure_acronym == region_acronym]
-    units = session.units
-    
-    # Load stimuli for this session
-    stimulus_presentations = session.stimulus_presentations
-    movie_presentations = stimulus_presentations[stimulus_presentations['stimulus_name'].isin(['natural_movie_one_more_repeats'])]
-    
-    print(f'Working with session: {session.ecephys_session_id}')
-    print(f'Extracting bursts for region: {region_acronym}')
-    print(f'Total units in session: {units.shape[0]}')
-    print(f'Total units in {region_acronym}: {region_units.shape[0]}')
-    
-    # Get trial stimuli time stamps
-    stimuli_frames_df, trials_df = get_trial_stimuli(movie_presentations, FRAMES_PER_TRIAL, TOTAL_TRIALS)
-    print(f'Extracted stimuli timestamps per trial')
-    
-    # Get timestamps of all spikes within each trial
-    trial_spikes = get_trial_spikes(session, trials_df, region_acronym)
-    print(f'Extracted spike timestamps within trial')
-    
-    # Define Burst Parameters
-    burst_params = {}
-    if region_acronym == 'LGd':
-        burst_params['max_begin_ISI'] = 0.04
-        burst_params['max_end_ISI'] = 0.1
-        burst_params['min_IBI'] = 0.1
-        burst_params['min_burst_duration'] = 0.01
-        burst_params['min_spikes_in_burst'] = 3
-    else:
-        burst_params['max_begin_ISI'] = 0.17 
-        burst_params['max_end_ISI'] = 0.3 
-        burst_params['min_IBI'] = 0.2
-        burst_params['min_burst_duration'] = 0.01
-        burst_params['min_spikes_in_burst'] = 3
-    
-    # Extract burst start and stop times across trials
-    burst_times = get_burst_times(trial_spikes, trials_df, burst_params)
-    
-    # Extract burst counts across all units across all trials
-    burst_df = get_burst_counts(burst_times, trials_df, BIN_DURATION)
-
-    # Extrat spike counts across all units across all trials
-    spike_df = get_spike_counts(trial_spikes, trials_df, BIN_DURATION)
-    
-    return burst_df, spike_df
 
 def get_spike_counts(trial_spikes, trials_df, bin_duration):
     """
@@ -423,3 +370,137 @@ def get_spike_counts(trial_spikes, trials_df, bin_duration):
     
     # Convert the list of dictionaries to a DataFrame and return it
     return pd.DataFrame(spike_data)
+
+def get_network_burst_counts(burst_times, trials_df, bin_duration, overlap_threshold, window_size):
+    """
+    Calculate network burst counts using a sliding window approach.
+    
+    Parameters:
+    burst_times (dict): A nested dictionary structure where:
+        - The outer key is the trial number
+        - The inner key is the unit ID
+        - The value is a list of tuples, each tuple containing (burst_start, burst_end) times
+    trials_df (pd.DataFrame): A DataFrame containing trial information, with columns:
+        - 'trial_number': The trial identifier
+        - 'start_time': The start time of the trial
+        - 'stop_time': The end time of the trial
+    bin_duration (float): The duration of each time bin in seconds
+    overlap_threshold (float): The proportion of units that must be bursting simultaneously to count as a network burst
+    window_size (int): The number of bins to consider for the sliding window
+    
+    Returns:
+    pd.DataFrame: A DataFrame with columns:
+        - 'trial': The trial number
+        - 'bin': The bin number within the trial
+        - 'network_burst_count': The number of distinct network bursts in that bin
+        - 'proportion_bursting': The proportion of units bursting in that bin
+        - 'num_bursting_units': The number of units bursting in that bin
+    """
+    network_burst_data = []
+    
+    for trial_number, trial_bursts in burst_times.items():
+        trial_info = trials_df[trials_df['trial_number'] == trial_number].iloc[0]
+        trial_start = trial_info['start_time']
+        trial_end = trial_info['stop_time']
+        trial_duration = trial_end - trial_start
+        
+        n_bins = int(np.floor(trial_duration / bin_duration))
+        n_units = len(trial_bursts)
+        unit_threshold = int(n_units * overlap_threshold)
+        
+        # Create a 2D array to track bursting status of each unit in each bin
+        burst_activity = np.zeros((n_units, n_bins), dtype=bool)
+        
+        for unit_idx, (unit_id, bursts) in enumerate(trial_bursts.items()):
+            for burst_start, burst_end in bursts:
+                if trial_start <= burst_start < trial_end:
+                    start_bin = min(n_bins - 1, max(0, int((burst_start - trial_start) / bin_duration)))
+                    end_bin = min(n_bins - 1, max(0, int((burst_end - trial_start) / bin_duration)))
+                    burst_activity[unit_idx, start_bin:end_bin+1] = True
+        
+        # Use a sliding window to detect network bursts
+        network_bursts = np.zeros(n_bins, dtype=int)
+        num_bursting_units = np.sum(burst_activity, axis=0)
+        proportion_bursting = num_bursting_units / n_units
+        
+        for bin_number in range(n_bins):
+            window_start = max(0, bin_number - window_size + 1)
+            window_end = bin_number + 1
+            window_proportion = np.mean(proportion_bursting[window_start:window_end])
+            
+            if window_proportion >= overlap_threshold:
+                network_bursts[bin_number] = 1
+        
+        # Compile the data
+        for bin_number in range(n_bins):
+            network_burst_data.append({
+                'trial': trial_number,
+                'bin': bin_number,
+                'network_burst_count': network_bursts[bin_number],
+                'proportion_bursting': proportion_bursting[bin_number],
+                'num_bursting_units': num_bursting_units[bin_number]
+            })
+    
+    return pd.DataFrame(network_burst_data)
+
+
+def get_session_bursts(session, region_acronym, FRAMES_PER_TRIAL, TOTAL_TRIALS, BIN_DURATION):
+    """
+    Process a session for a specific brain region, extracting burst information.
+
+    Parameters:
+    session (object): Session object containing unit and stimulus information.
+    region_acronym (str): Acronym of the brain region to process.
+    FRAMES_PER_TRIAL (int): Number of frames in each trial.
+    TOTAL_TRIALS (int): Total number of trials to process.
+    BIN_DURATION (float): Duration of each bin for burst counting.
+
+    Returns:
+    pd.DataFrame: DataFrame containing burst counts for each bin in each trial.
+    """
+    # Load units in region for this session
+    region_units = session.units[session.units.ecephys_structure_acronym == region_acronym]
+    units = session.units
+    
+    # Load stimuli for this session
+    stimulus_presentations = session.stimulus_presentations
+    movie_presentations = stimulus_presentations[stimulus_presentations['stimulus_name'].isin(['natural_movie_one_more_repeats'])]
+    
+    print(f'Working with session: {session.ecephys_session_id}')
+    print(f'Extracting bursts for region: {region_acronym}')
+    print(f'Total units in session: {units.shape[0]}')
+    print(f'Total units in {region_acronym}: {region_units.shape[0]}')
+    
+    # Get trial stimuli time stamps
+    stimuli_frames_df, trials_df = get_trial_stimuli(movie_presentations, FRAMES_PER_TRIAL, TOTAL_TRIALS)
+    print(f'Extracted stimuli timestamps per trial')
+    
+    # Get timestamps of all spikes within each trial
+    trial_spikes = get_trial_spikes(session, trials_df, region_acronym)
+    print(f'Extracted spike timestamps within trial')
+    
+    # Define Burst Parameters
+    burst_params = {}
+    if region_acronym == 'LGd':
+        burst_params['max_begin_ISI'] = 0.04
+        burst_params['max_end_ISI'] = 0.1
+        burst_params['min_IBI'] = 0.1
+        burst_params['min_burst_duration'] = 0.01
+        burst_params['min_spikes_in_burst'] = 3
+    else:
+        burst_params['max_begin_ISI'] = 0.17 
+        burst_params['max_end_ISI'] = 0.3 
+        burst_params['min_IBI'] = 0.2
+        burst_params['min_burst_duration'] = 0.01
+        burst_params['min_spikes_in_burst'] = 3
+    
+    # Extract burst start and stop times across trials
+    burst_times = get_burst_times(trial_spikes, trials_df, burst_params)
+    
+    # Extract burst counts across all units across all trials
+    burst_df = get_burst_counts(burst_times, trials_df, BIN_DURATION)
+
+    # Extrat spike counts across all units across all trials
+    spike_df = get_spike_counts(trial_spikes, trials_df, BIN_DURATION)
+    
+    return burst_df, spike_df
