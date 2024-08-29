@@ -571,7 +571,7 @@ def get_session_bursts(session, region_acronym, FRAMES_PER_TRIAL, TOTAL_TRIALS, 
     network_burst_df = get_network_burst_counts(burst_times, trials_df, BIN_DURATION, OVERLAP_THRESHOLD, WINDOW_SIZE)
 
     # Extract mean velocity across all bins across all trials
-    velocities_df = get_mean_velocities(session, trials_df, BIN_DURATION):
+    velocities_df = get_mean_velocities(session, trials_df, BIN_DURATION)
  
     # merge results
     temp = pd.merge(spike_df, burst_df, on=['trial','bin'])
