@@ -41,6 +41,14 @@ def main():
         
         # loop through regions of interest
         for brain_structure in BRAIN_STRUCTURES:
+            # store results --------------------------------------------------------=----
+            df = pd.DataFrame({
+                'session_id'     : [session_id]*1800,
+                'brain_structure': [brain_structure]*1800,
+                'sweep'          : np.repeat(np.arange(2), 900),
+                'trial'          : np.repeat(np.arange(30), 60),
+                'bin'            : np.tile(np.arange(30), 60)})
+            
             # extract LFP features -----------------------------------------------------
             # get LFP events
             lfp_epochs, time = get_lfp_epochs(session_data, fs=FS_LFP,
@@ -52,33 +60,29 @@ def main():
                                              time_window_length=TIME_WINDOW_LENGTH)
             tfr = np.mean(tfr_all, axis=1) # average over channels
             
-            # parameterize spectra, compute aperiodic exponent, and flattened spectra
+            # parameterize spectra, compute aperiodic exponent and total power, and 
             sgm = apply_specparam(tfr, tfr_freqs, SPECPARAM_SETTINGS, N_JOBS)
             exponent = sgm.get_params('aperiodic', 'exponent')
-            tfr_flat = compute_flattened_spectra(sgm)
+            df['exponent'] = exponent            
+            df['total_power'] = np.ravel(np.mean(tfr, axis=1))
+            
+            # flattened spectra
+            # tfr_flat = compute_flattened_spectra(sgm)
             
             # extract spectral events
-            se_df = extract_se(lfp_epochs, FREQS_SE, event_band=EVENT_BAND, fs=FS_LFP, 
-                               n_cycles=N_CYCLES, n_jobs=N_JOBS)
+            # se_df = extract_se(lfp_epochs, FREQS_SE, event_band=EVENT_BAND, fs=FS_LFP, 
+            #                    n_cycles=N_CYCLES, n_jobs=N_JOBS)
+            # for feature_in, feature in zip([["Peak Frequency", "Event Duration", "Normalized Peak Power"], 
+            #                                 ["peak_frequency", "event_duration", "normalized_peak_power"]]):
+            #     df[feature] = se_df[feature_in]
 
             # extract Spike Features ----------------------------------------------------
             spike_df = get_session_bursts(session_data, brain_structure, FRAMES_PER_TRIAL, 
                                           TOTAL_TRIALS, BIN_DURATION)
-            
-            # store results --------------------------------------------------------=----
-            df = pd.DataFrame({
-                'session_id'     : [session_id]*1800,
-                'brain_structure': [brain_structure]*1800,
-                'sweep'          : np.repeat(np.arange(2), 900),
-                'trial'          : np.repeat(np.arange(30), 60),
-                'bin'            : np.tile(np.arange(30), 60)})
-            df['exponent'] = exponent
-            df['total_power'] = np.ravel(np.mean(tfr, axis=1))
             for feature in df.columns[2:]:
                 df[feature] = spike_df[feature]
-            for feature_in, feature in zip([["Peak Frequency", "Event Duration", "Normalized Peak Power"], 
-                                            ["peak_frequency", "event_duration", "normalized_peak_power"]]):
-                df[feature] = se_df[feature_in]
+
+            # store results
             df_list.append(df)
             break # TEMP!         
         break # TEMP!
