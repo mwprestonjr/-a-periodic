@@ -88,12 +88,11 @@ def main():
             np.save(f'results/tfr/{session_id}_{brain_structure}.npy', tfr_flat)
             del tfr_flat
         
-            # extract Spike Features ----------------------------------------------------
-            print('Extracting spike features...')
-            spike_df = get_session_bursts(session_data, brain_structure, FRAMES_PER_TRIAL, 
-                                          TOTAL_TRIALS, BIN_DURATION, OVERLAP_THRESHOLD, 
-                                          WINDOW_SIZE)
-            for feature in spike_df.columns[2:]:
+            # extract spike and behavior features ---------------------------------------
+            print('Extracting spike and behavior features...')
+            df = get_session_bursts(session_data, brain_structure, FRAMES_PER_TRIAL, 
+                                    TOTAL_TRIALS, BIN_DURATION, OVERLAP_THRESHOLD, WINDOW_SIZE)
+            for feature in df.columns[2:]:
                 df[feature] = spike_df[feature]
 
             # save intermediateresults
