@@ -61,16 +61,19 @@ def main():
             
             tfr = np.mean(tfr_all, axis=1) # average over channels
             
+            tfr_epoch = tfr.reshape(tfr.shape[0],tfr.shape[1],int(tfr.shape[-1] / FS_LFP), FS_LFP)
             
             # spectral events
-            se_df = extract_se(tfr,FREQ)
+            se_df = extract_se(tfr_epoch,FREQ)
+            
+            del tfr tfr_all
             
             for feature_in, feature in zip([["Peak Frequency", "Event Duration", "Normalized Peak Power"],
                                             ["peak_frequency", "event_duration", "normalized_peak_power"]]):
                 df[feature] = se_df[feature_in]
             
             # decim TFR for spec param
-            # tfr = 
+            tfr = tfr_epoch.mean(axis=3)
             
             # parameterize spectra, compute aperiodic exponent and total power, and 
             sgm = apply_specparam(tfr, tfr_freqs, SPECPARAM_SETTINGS, N_JOBS)

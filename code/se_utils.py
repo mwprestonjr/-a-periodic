@@ -21,7 +21,7 @@ def events_to_pd(events):
     return event_df
 
 
-def extract_se(tfr, freqs, event_band=[2, 20], fs=1250, n_cycles=5.0, n_jobs=10):
+def extract_se(tfr_epoch, freqs, event_band=[2, 20], fs=1250, n_cycles=5.0, n_jobs=10):
     
     import sys
     sys.path.append('SpectralEvents')
@@ -58,26 +58,14 @@ def extract_se(tfr, freqs, event_band=[2, 20], fs=1250, n_cycles=5.0, n_jobs=10)
     freq = np.linspace(*freqs)
     l_epoch = 1/(np.diff(freq)[0])     # calculate length of epoch
     
-    
-    # (this seems a bit inefficient but np.swapaxes did some wild shit for me.
-    # Change LFP rate for SE function - first cut 30s movies into 1s trials
-    tfr_epoch = np.zeros(
-        (tfr.shape[0], len(freq), int(tfr.shape[-1] / int(fs*l_epoch)), int(fs*l_epoch))
-    )
-    for trial_idx in range(tfr.shape[0]):
-            for f in range(len(freq)):
-                tfr_epoch[trial_idx][f] = tfr[trial_idx][f].reshape(
-                    int(tfr.shape[-1] / fs), fs
-                )
-
-    # convert to epochs x freq x samples
+    # convert to epochs x freq x samples (this seems a bit inefficient but np.swapaxes did some wild shit for me)
     tfr_epoch_se = np.zeros(
-        (int(tfr_epoch.shape[-2] * tfr.shape[0]), len(freq), fs)
+        (int(tfr_epoch.shape[-2] * tfr_epoch.shape[0]), len(freq), fs)
     )
-    trial_ids = np.zeros((int(tfr_epoch.shape[-2] * tfr.shape[0]),))
-    bin_ids = np.zeros((int(tfr_epoch.shape[-2] * tfr.shape[0]),))
+    trial_ids = np.zeros((int(tfr_epoch.shape[-2] * tfr_epoch.shape[0]),))
+    bin_ids = np.zeros((int(tfr_epoch.shape[-2] * tfr_epoch.shape[0]),))
     c = 0
-    for film_idx in range(tfr.shape[0]):
+    for film_idx in range(tfr_epoch.shape[0]):
         for bin_id in range(tfr_epoch.shape[-2]):
             trial_ids[c] = film_idx
             bin_ids[c] = bin_id
