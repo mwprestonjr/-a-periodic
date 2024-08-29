@@ -21,12 +21,11 @@ def events_to_pd(events):
     return event_df
 
 
-def extract_se(lfp, foi, event_band=[2, 20], fs=1250, n_cycles=5.0, n_jobs=10):
+def extract_se(tfr, freqs, event_band=[2, 20], fs=1250, n_cycles=5.0, n_jobs=10):
     
     import sys
     sys.path.append('SpectralEvents')
     import spectralevents as se
-    from mne.time_frequency import tfr_array_morlet
     import pandas as pd
     import numpy as np
 
@@ -35,10 +34,10 @@ def extract_se(lfp, foi, event_band=[2, 20], fs=1250, n_cycles=5.0, n_jobs=10):
 
     Parameters
     ----------
-    lfp : 3d array
-        LFP data (trials x channels x samples).
+    tfr : 3d array
+        TFR estimated with Morlet wavelet. trial x frequencies x length of movie in samples.
     freqs : tuple
-        frequency range of the TFR (lower bound, upper bound, step)
+        frequency range of the TFR used as input to linspace (start, stop, num)
     event_band : list
         range of frequencies for which events should be identified
 
@@ -56,45 +55,34 @@ def extract_se(lfp, foi, event_band=[2, 20], fs=1250, n_cycles=5.0, n_jobs=10):
 
     """
 
-    freqs = np.arange(*foi)
-    tfr = tfr_array_morlet(
-        lfp,
-        fs,
-        freqs,
-        n_cycles=n_cycles,
-        zero_mean=True,
-        use_fft=True,
-        decim=1,
-        output="power",
-        n_jobs=n_jobs,
-    )
-
+    freq = np.linspace(*freqs)
+    l_epoch = 1/(np.diff(freq)[0])     # calculate length of epoch
+    
+    
+    # (this seems a bit inefficient but np.swapaxes did some wild shit for me.
     # Change LFP rate for SE function - first cut 30s movies into 1s trials
-    l_epoch = 1/foi[2]
     tfr_epoch = np.zeros(
-        (tfr.shape[0], tfr.shape[1], len(freqs), int(tfr.shape[-1] / int(fs*l_epoch)), int(fs*l_epoch))
+        (tfr.shape[0], len(freq), int(tfr.shape[-1] / int(fs*l_epoch)), int(fs*l_epoch))
     )
     for trial_idx in range(tfr.shape[0]):
-        for chan in range(tfr.shape[1]):
-            for f in range(len(freqs)):
-                tfr_epoch[trial_idx][chan][f] = tfr[trial_idx][chan][f].reshape(
+            for f in range(len(freq)):
+                tfr_epoch[trial_idx][f] = tfr[trial_idx][f].reshape(
                     int(tfr.shape[-1] / fs), fs
                 )
 
-    # convert to channels x epochs x freqs x samples
+    # convert to epochs x freq x samples
     tfr_epoch_se = np.zeros(
-        (tfr.shape[1], int(tfr_epoch.shape[-2] * tfr.shape[0]), len(freqs), fs)
+        (int(tfr_epoch.shape[-2] * tfr.shape[0]), len(freq), fs)
     )
     trial_ids = np.zeros((int(tfr_epoch.shape[-2] * tfr.shape[0]),))
     bin_ids = np.zeros((int(tfr_epoch.shape[-2] * tfr.shape[0]),))
-    for chan in range(tfr.shape[1]):
-        c = 0
-        for film_idx in range(tfr.shape[0]):
-            for bin_id in range(tfr_epoch.shape[-2]):
-                trial_ids[c] = film_idx
-                bin_ids[c] = bin_id
-                tfr_epoch_se[chan, c, :, :] = tfr_epoch[film_idx, chan, :, bin_id, :]
-                c += 1
+    c = 0
+    for film_idx in range(tfr.shape[0]):
+        for bin_id in range(tfr_epoch.shape[-2]):
+            trial_ids[c] = film_idx
+            bin_ids[c] = bin_id
+            tfr_epoch_se[c, :, :] = tfr_epoch[film_idx, :, bin_id, :]
+            c += 1
 
     # store trial and bin info
     sweep = (trial_ids > 29).astype(int)
@@ -107,9 +95,8 @@ def extract_se(lfp, foi, event_band=[2, 20], fs=1250, n_cycles=5.0, n_jobs=10):
 
     ## Find spectral events
     times = np.linspace(0, 1, fs)
-    tfr_avg = tfr_epoch_se.mean(axis=0)
     events = se.find_events(
-        tfr=tfr_avg, times=times, freqs=freqs, event_band=event_band, threshold_FOM=6
+        tfr=tfr_epoch_se, times=times, freqs=freq, event_band=event_band, threshold_FOM=6
     )
 
     # convert to data frame
@@ -118,7 +105,7 @@ def extract_se(lfp, foi, event_band=[2, 20], fs=1250, n_cycles=5.0, n_jobs=10):
     ## Create dataframe with trial info and events
     se_df = pd.DataFrame(
         {
-            "trial": np.arange(tfr_avg.shape[0]),
+            "trial": np.arange(tfr_epoch_se.shape[0]),
             "Peak Frequency": 0,
             "Event Duration": 0,
             "Normalized Peak Power": 0,

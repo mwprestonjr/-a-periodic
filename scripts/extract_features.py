@@ -55,10 +55,22 @@ def main():
                                               brain_structure=brain_structure)
 
             # compute tfr
-            tfr_all, tfr_freqs = compute_tfr(lfp_epochs, FS_LFP, FREQS, decim=FS_LFP,
-                                             freq_bandwidth=FREQ_BANDWIDTH,
-                                             time_window_length=TIME_WINDOW_LENGTH)
+            tfr_all, tfr_freqs = compute_tfr(lfp_epochs, FS_LFP, FREQS, decim=1.,
+                                             method='morlet', n_morlet_cycle=5, n_jobs=N_JOBS)
+            
+            
             tfr = np.mean(tfr_all, axis=1) # average over channels
+            
+            
+            # spectral events
+            se_df = extract_se(tfr,FREQ)
+            
+            for feature_in, feature in zip([["Peak Frequency", "Event Duration", "Normalized Peak Power"],
+                                            ["peak_frequency", "event_duration", "normalized_peak_power"]]):
+                df[feature] = se_df[feature_in]
+            
+            # decim TFR for spec param
+            # tfr = 
             
             # parameterize spectra, compute aperiodic exponent and total power, and 
             sgm = apply_specparam(tfr, tfr_freqs, SPECPARAM_SETTINGS, N_JOBS)
@@ -68,13 +80,6 @@ def main():
             
             # flattened spectra
             # tfr_flat = compute_flattened_spectra(sgm)
-            
-            # extract spectral events
-            # se_df = extract_se(lfp_epochs, FREQS_SE, event_band=EVENT_BAND, fs=FS_LFP, 
-            #                    n_cycles=N_CYCLES, n_jobs=N_JOBS)
-            # for feature_in, feature in zip([["Peak Frequency", "Event Duration", "Normalized Peak Power"], 
-            #                                 ["peak_frequency", "event_duration", "normalized_peak_power"]]):
-            #     df[feature] = se_df[feature_in]
 
             # extract Spike Features ----------------------------------------------------
             spike_df = get_session_bursts(session_data, brain_structure, FRAMES_PER_TRIAL, 
