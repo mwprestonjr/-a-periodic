@@ -76,7 +76,7 @@ def main():
             for feature in df.columns[2:]:
                 df[feature] = spike_df[feature]
             for feature_in, feature in zip([["Peak Frequency", "Event Duration", "Normalized Peak Power"], 
-                                            ["peak_frequency", "event_duration", "normalized_peak_power"]])
+                                            ["peak_frequency", "event_duration", "normalized_peak_power"]]):
                 df[feature] = se_df[feature_in]
             df_list.append(df)
             break # TEMP!         
