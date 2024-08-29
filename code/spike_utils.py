@@ -515,13 +515,9 @@ def get_session_bursts(session, region_acronym, FRAMES_PER_TRIAL, TOTAL_TRIALS, 
     BIN_DURATION (float): Duration of each bin for burst counting.
 
     Returns:
-    spike_df: DataFrame containing spike features for each bin in each trial. 
+    df: DataFrame containing spike features for each bin in each trial. 
         Features include spike count, burst count, whether network burst 
-        happened and proportion of units bursting
-    trail_df: DataFrame containing trial information, with columns:
-        - 'trial_number': The trial identifier
-        - 'start_time': The start time of the trial
-        - 'stop_time': The end time of the trial
+        happened and proportion of units bursting, and mean velocity
     """
 
     # Load units in region for this session
@@ -579,7 +575,7 @@ def get_session_bursts(session, region_acronym, FRAMES_PER_TRIAL, TOTAL_TRIALS, 
  
     # merge results
     temp = pd.merge(spike_df, burst_df, on=['trial','bin'])
-    temp_2 = pd.merge(temp, velocities_df, on=['trial','bin'])
-    df = pd.merge(temp_2, network_burst_df, on=['trial','bin'])
+    temp = pd.merge(temp, velocities_df, on=['trial','bin'])
+    df = pd.merge(temp, network_burst_df, on=['trial','bin'])
     
-    return  spike_df, trial_df
+    return  df
