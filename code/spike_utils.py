@@ -515,4 +515,8 @@ def get_session_bursts(session, region_acronym, FRAMES_PER_TRIAL, TOTAL_TRIALS, 
     # Extract network bursts across all bins across all trials
     network_burst_df = get_network_burst_counts(burst_times, trials_df, BIN_DURATION, OVERLAP_THRESHOLD, WINDOW_SIZE)
     
-    return  spike_df, burst_df, network_burst_df
+    # merge results
+    temp = pd.merge(spike_df, burst_df, on=['trial','bin'])
+    df = pd.merge(temp, network_burst_df, on=['trial','bin'])
+    
+    return  df
