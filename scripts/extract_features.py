@@ -17,7 +17,7 @@ import sys
 sys.path.append("code")
 from settings import *
 from utils import set_data_root, apply_specparam, compute_flattened_spectra
-from allen_utils import get_lfp_epochs
+from allen_utils import load_project_cache, get_lfp_epochs
 from tfr_utils import compute_tfr
 from spike_utils import get_session_bursts
 from se_utils import extract_se
@@ -32,13 +32,9 @@ def main():
         if not os.path.exists(f"results/{folder}"):
             os.makedirs(f"results/{folder}")
     
-    # Set file location based on platform.
-    data_root = set_data_root()
-
     # load project cache
-    manifest_path = os.path.join(data_root, "allen-brain-observatory/visual-coding-neuropixels/ecephys-cache/manifest.json")
-    cache = EcephysProjectCache.from_warehouse(manifest=manifest_path)
-    
+    cache = load_project_cache
+
     # initiailize results
     df_list = []
     
