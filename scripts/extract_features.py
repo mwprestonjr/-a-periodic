@@ -71,14 +71,11 @@ def main():
             
             # extract spectral events
             print('  Computing spectral events')
-            se_df = extract_se(tfr, FREQS, event_band=EVENT_BAND, fs=FS_LFP, n_jobs=N_JOBS)
             tfr = tfr.reshape(tfr.shape[0],tfr.shape[1],int(tfr.shape[-1] / FS_LFP), FS_LFP)
-            
-            # spectral events
-            se_df = extract_se(tfr,FREQS,event_band=EVENT_BAND)
+            se_df = extract_se(tfr, FREQS, event_band=EVENT_BAND, fs=FS_LFP, n_jobs=N_JOBS)
                         
-            for feature_in, feature in zip(["Peak Frequency", "Event Duration", "Normalized Peak Power"],
-                                            ["peak_frequency", "event_duration", "normalized_peak_power"]):
+            for feature_in, feature in zip(["Peak Frequency", "Event Duration", "Normalized Peak Power", "Peak Time"],
+                                            ["peak_frequency", "event_duration", "normalized_peak_power", "peak_time"]):
                 df[feature] = se_df[feature_in]
             
             # parameterize spectra, compute aperiodic exponent and total power
@@ -94,6 +91,12 @@ def main():
             print('  Flattening spectra')
             tfr_flat = compute_flattened_spectra(sgm)
             np.save(f'results/tfr/{session_id}_{brain_structure}.npy', tfr_flat)
+            
+            # find maximum power
+            # find frequency with max power
+            avg_spec = tfr_flat.mean(axis=0)        
+            df['periodic_pow'] = tfr_flat[:,np.argmax(avg_spec)]
+            
             del tfr_flat
         
             # extract spike and behavior features ---------------------------------------
@@ -112,7 +115,7 @@ def main():
             # display progress
             print_time_elapsed(t_start_s, "Session/structure complete in: ")
             
-#             break # TEMP!         
+            break # TEMP!         
 #         break # TEMP!
     
     # save results

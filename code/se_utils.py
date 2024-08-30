@@ -94,12 +94,13 @@ def extract_se(tfr_epoch, freqs, event_band=[2, 20], fs=1250, n_jobs=10):
             "Peak Frequency": 0,
             "Event Duration": 0,
             "Normalized Peak Power": 0,
+            "Peak Time", 0
         }
     )
     se_df.set_index("trial", inplace=True)
     events_df.set_index("trial", inplace=True)
     se_df.update(
-        events_df[["Peak Frequency", "Event Duration", "Normalized Peak Power"]]
+        events_df[["Peak Frequency", "Event Duration", "Normalized Peak Power", "Peak Time"]]
     )
     se_df.index.rename("", inplace=True)
 
