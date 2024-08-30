@@ -1,5 +1,5 @@
 """
-Spike analysis utility functions.
+Spike and behavioral analysis utility functions.
 
 FUNCTIONS:
 ----------
@@ -9,28 +9,26 @@ FUNCTIONS:
 - maxInterval: Detects bursts in a spike train using the MaxInterval method.
 - get_burst_times: Collects burst start and stop times for each unit in each trial.
 - get_burst_counts: Calculates burst counts for each time bin across all trials and units.
+- get_spikecounts: Calculates spike counts for each time bin across all trials and units.
+- get_network_burst_counts: Calculates network burst counts and proportion of population bursting.
+- get_behavior: computes mean running speed and pupil area for each time bin across all trials and units.
 - get_session_bursts: Processes a session for a specific brain region, extracting burst information.
 
 EXAMPLE USAGE:
 -------------
+df = get_session_bursts(session, region_acronym, FRAMES_PER_TRIAL, TOTAL_TRIALS, BIN_DURATION, OVERLAP_THRESHOLD, WINDOW_SIZE)
 
-spike_df, burst_df, network_burst_df, velocity_df = get_session_bursts(session, region_acronym, FRAMES_PER_TRIAL, TOTAL_TRIALS, BIN_DURATION, OVERLAP_THRESHOLD, WINDOW_SIZE)
     Returns:
-    spike_df: DataFrame containing spike counts for each bin in each trial.
-    burst_df: DataFrame containing burst counts for each bin in each trial.
-    network_burst_df: DataFrame containing whether network burst happened and proportion of units bursting for each bin in each trial.
-
+    df: DataFrame containing spike counts, burst counts, whether network burst happened and proportion of units bursting, mean running speed and pupil area for each bin in each trial.
 
 """
-
-
 
 # imports
 import os
 import numpy as np
 import pandas as pd
 from collections import deque
-from settings import SESSIONS, BRAIN_STRUCTURES, FRAMES_PER_TRIAL, TOTAL_TRIALS, BIN_DURATION, OVERLAP_THRESHOLD, WINDOW_SIZE
+from settings import *
 
 def get_trial_stimuli(movie_presentations, FRAMES_PER_TRIAL, TOTAL_TRIALS):
     """
