@@ -12,6 +12,7 @@ FUNCTIONS:
 - get_spikecounts: Calculates spike counts for each time bin across all trials and units.
 - get_network_burst_counts: Calculates network burst counts and proportion of population bursting.
 - get_behavior: computes mean running speed and pupil area for each time bin across all trials and units.
+- get_mean_velocities: computes mean running speed for each time bin across all trials and units.
 - get_session_bursts: Processes a session for a specific brain region, extracting burst information.
 
 EXAMPLE USAGE:
@@ -446,6 +447,7 @@ def get_network_burst_counts(burst_times, trials_df, bin_duration, overlap_thres
     
     return pd.DataFrame(network_burst_data)
 
+
 def get_behavior(session, trials_df, bin_duration):
     """
     Calculate mean velocities and pupil area for each time bin across all trials.
@@ -470,8 +472,16 @@ def get_behavior(session, trials_df, bin_duration):
     behavior_data = [] # to store results
     running_speed = session.running_speed
     pupil_data = session.get_screen_gaze_data()
-    pupil_area = pd.DataFrame({'time' : pupil_data.index,
-                               'pupil_area' : pupil_data['raw_eye_area']}).reset_index(drop=True)
+    
+    
+    # ensure pupil data exists
+    if pupil_data is None:
+        behavior_df = get_mean_velocities(session, trials_df, bin_duration)
+        behavior_df['mean_pupil_area'] = np.nan
+        return behavior_df
+    else:
+        pupil_area = pd.DataFrame({'time' : pupil_data.index,
+                                   'pupil_area' : pupil_data['raw_eye_area']}).reset_index(drop=True)
     
     # loop over trials (30 second movies)
     for _, trial_info in trials_df.iterrows():
@@ -516,6 +526,59 @@ def get_behavior(session, trials_df, bin_duration):
     
     return pd.DataFrame(behavior_data)
 
+
+def get_mean_velocities(session, trials_df, bin_duration):
+    """
+    Calculate mean velocities for each time bin across all trials.
+    
+    Parameters:
+    running_speed (pd.DataFrame): A DataFrame containing running speed data, with columns:
+        - 'start_time': The start time of each velocity measurement
+        - 'end_time': The end time of each velocity measurement
+        - 'velocity': The velocity measurement
+    trials_df (pd.DataFrame): A DataFrame containing trial information, with columns:
+        - 'trial_number': The trial identifier
+        - 'start_time': The start time of the trial
+        - 'stop_time': The end time of the trial
+    bin_duration (float): The duration of each time bin in seconds
+    
+    Returns:
+    pd.DataFrame: A DataFrame with columns:
+        - 'trial': The trial number (integer)
+        - 'bin': The bin number within the trial
+        - 'mean_velocity': The mean velocity in that bin
+    """
+    velocity_data = []
+    
+    running_speed = session.running_speed
+    
+    for _, trial_info in trials_df.iterrows():
+        trial_number = int(trial_info['trial_number'])  # Ensure trial number is an integer
+        trial_start = trial_info['start_time']
+        trial_end = trial_info['stop_time']
+        trial_duration = trial_end - trial_start
+        
+        n_bins = int(np.floor(trial_duration / bin_duration))
+        
+        trial_speeds = running_speed[(running_speed['start_time'] >= trial_start) & 
+                                     (running_speed['start_time'] < trial_end)]
+        
+        bin_velocities = [[] for _ in range(n_bins)]
+        
+        for _, speed_row in trial_speeds.iterrows():
+            bin_number = int((speed_row['start_time'] - trial_start) / bin_duration)
+            if 0 <= bin_number < n_bins:
+                bin_velocities[bin_number].append(speed_row['velocity'])
+        
+        for bin_number, velocities in enumerate(bin_velocities):
+            mean_velocity = np.mean(velocities) if velocities else np.nan
+            velocity_data.append({
+                'trial': trial_number,
+                'bin': bin_number,
+                'mean_velocity': mean_velocity
+            })
+    
+    return pd.DataFrame(velocity_data)
 
 
 def get_session_bursts(session, region_acronym, FRAMES_PER_TRIAL, TOTAL_TRIALS, BIN_DURATION, OVERLAP_THRESHOLD, WINDOW_SIZE):
@@ -586,11 +649,11 @@ def get_session_bursts(session, region_acronym, FRAMES_PER_TRIAL, TOTAL_TRIALS, 
     network_burst_df = get_network_burst_counts(burst_times, trials_df, BIN_DURATION, OVERLAP_THRESHOLD, WINDOW_SIZE)
 
     # Extract mean velocity across all bins across all trials
-    velocities_df = get_behavior(session, trials_df, BIN_DURATION)
+    behavior_df = get_behavior(session, trials_df, BIN_DURATION)
  
     # merge results
     df = pd.merge(spike_df, burst_df, on=['trial','bin'])
-    df = pd.merge(df, velocities_df, on=['trial','bin'])
+    df = pd.merge(df, behavior_df, on=['trial','bin'])
     df = pd.merge(df, network_burst_df, on=['trial','bin'])
     
     return  df
