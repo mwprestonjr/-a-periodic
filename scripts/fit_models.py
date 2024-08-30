@@ -19,7 +19,7 @@ from settings import *
 X_FEATURE = ['spike_count','proportion_bursting','exponent','periodic_pow']
 Y_FEATURE = ['exponent','periodic_pow']
 STRUCTURES = [['LGd','VISp'],['LGd','VISl'],['VISp', 'VISl']]
-SESSIONS = [766640955]
+# SESSIONS = [766640955]
 def main():
     # load results and reformat 
     
@@ -75,7 +75,7 @@ def main():
 
                 # increase count
                 c += 1
-        break
+        # break
         
     """
     STORE MODEL RESULTS TO FILE
