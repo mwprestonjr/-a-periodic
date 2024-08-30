@@ -120,7 +120,7 @@ def main():
     
     # save results
     results = pd.concat(df_list)
-    results.to_csv('results/feature_df.csv', index=False)
+    results.to_csv('data/feature_df.csv', index=False)
                                
     # display progress
     print_time_elapsed(t_start, "\n\nTotal analysis time: ")

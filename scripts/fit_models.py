@@ -23,7 +23,7 @@ STRUCTURES = [['LGd','VISp'],['LGd','VISl'],['VISp', 'VISl']]
 def main():
     # load results and reformat 
     
-    df = pd.read_csv('scratch/results/feature_df.csv')
+    df = pd.read_csv('data/feature_df.csv')
     # do we need this?
     num_models = len(Y_FEATURE)*len(STRUCTURES)*len(SESSIONS)
 
@@ -84,7 +84,7 @@ def main():
     STORE MODEL RESULTS TO FILE
     """
     # save results
-    df_results.to_csv('results/glm_results.csv', index=False)
+    df_results.to_csv('data/glm_results.csv', index=False)
 
 if __name__ == '__main__':
     main()
