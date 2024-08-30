@@ -41,7 +41,7 @@ def main():
         
         # loop through regions of interest
         for brain_structure in BRAIN_STRUCTURES:
-            # store results --------------------------------------------------------=----
+            # store results
             df = pd.DataFrame({
                 'session_id'     : [session_id]*1800,
                 'brain_structure': [brain_structure]*1800,
@@ -49,8 +49,7 @@ def main():
                 'trial'          : np.repeat(np.arange(30), 60),
                 'bin'            : np.tile(np.arange(30), 60)})
             
-            # extract LFP features -----------------------------------------------------
-            # get LFP events
+            # extract LFP features 
             lfp_epochs, time = get_lfp_epochs(session_data, fs=FS_LFP,
                                               brain_structure=brain_structure)
 
