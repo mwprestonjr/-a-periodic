@@ -448,15 +448,12 @@ def get_network_burst_counts(burst_times, trials_df, bin_duration, overlap_thres
     
     return pd.DataFrame(network_burst_data)
 
-def get_mean_velocities(session, trials_df, bin_duration):
+def get_behavior(session, trials_df, bin_duration):
     """
-    Calculate mean velocities for each time bin across all trials.
+    Calculate mean velocities and pupil area for each time bin across all trials.
     
     Parameters:
-    running_speed (pd.DataFrame): A DataFrame containing running speed data, with columns:
-        - 'start_time': The start time of each velocity measurement
-        - 'end_time': The end time of each velocity measurement
-        - 'velocity': The velocity measurement
+    session : AllenSDK session data object
     trials_df (pd.DataFrame): A DataFrame containing trial information, with columns:
         - 'trial_number': The trial identifier
         - 'start_time': The start time of the trial
@@ -468,6 +465,7 @@ def get_mean_velocities(session, trials_df, bin_duration):
         - 'trial': The trial number (integer)
         - 'bin': The bin number within the trial
         - 'mean_velocity': The mean velocity in that bin
+        - 'mean_pupil_area': The mean pupil area in that bin
     """
     
     # init
@@ -590,7 +588,7 @@ def get_session_bursts(session, region_acronym, FRAMES_PER_TRIAL, TOTAL_TRIALS, 
     network_burst_df = get_network_burst_counts(burst_times, trials_df, BIN_DURATION, OVERLAP_THRESHOLD, WINDOW_SIZE)
 
     # Extract mean velocity across all bins across all trials
-    velocities_df = get_mean_velocities(session, trials_df, BIN_DURATION)
+    velocities_df = get_behavior(session, trials_df, BIN_DURATION)
  
     # merge results
     df = pd.merge(spike_df, burst_df, on=['trial','bin'])
