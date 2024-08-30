@@ -469,37 +469,56 @@ def get_mean_velocities(session, trials_df, bin_duration):
         - 'bin': The bin number within the trial
         - 'mean_velocity': The mean velocity in that bin
     """
-    velocity_data = []
     
+    # init
+    behavior_data = [] # to store results
     running_speed = session.running_speed
+    pupil_data = session.get_screen_gaze_data()
+    pupil_area = pd.DataFrame({'time' : pupil_data.index,
+                               'pupil_area' : pupil_data['raw_eye_area']}).reset_index(drop=True)
     
+    # loop over trials (30 second movies)
     for _, trial_info in trials_df.iterrows():
         trial_number = int(trial_info['trial_number'])  # Ensure trial number is an integer
         trial_start = trial_info['start_time']
         trial_end = trial_info['stop_time']
         trial_duration = trial_end - trial_start
         
-        n_bins = int(np.floor(trial_duration / bin_duration))
-        
+        # get behavior for trial
         trial_speeds = running_speed[(running_speed['start_time'] >= trial_start) & 
                                      (running_speed['start_time'] < trial_end)]
+        trial_areas = pupil_area.loc[(pupil_area['time'] >= trial_start) & 
+                                     (pupil_area['time'] < trial_end)]
         
+        # init
+        n_bins = int(np.floor(trial_duration / bin_duration))
         bin_velocities = [[] for _ in range(n_bins)]
+        bin_areas = [[] for _ in range(n_bins)]
         
+        # iterate rows (samples in trial) for speed
         for _, speed_row in trial_speeds.iterrows():
             bin_number = int((speed_row['start_time'] - trial_start) / bin_duration)
             if 0 <= bin_number < n_bins:
                 bin_velocities[bin_number].append(speed_row['velocity'])
+                
+        # iterate rows (samples in trial) for pupil area
+        for _, area_row in trial_areas.iterrows():
+            bin_number = int((area_row['time'] - trial_start) / bin_duration)
+            if 0 <= bin_number < n_bins:                
+                bin_areas[bin_number].append(area_row['pupil_area'])
         
-        for bin_number, velocities in enumerate(bin_velocities):
+        # average behavior measures for each bin (1 second window)
+        for bin_number, (velocities, areas) in enumerate(zip(bin_velocities, bin_areas)):
             mean_velocity = np.mean(velocities) if velocities else np.nan
-            velocity_data.append({
+            mean_area = np.mean(areas) if areas else np.nan
+            behavior_data.append({
                 'trial': trial_number,
                 'bin': bin_number,
-                'mean_velocity': mean_velocity
+                'mean_velocity': mean_velocity,
+                'mean_pupil_area': mean_area
             })
     
-    return pd.DataFrame(velocity_data)
+    return pd.DataFrame(behavior_data)
 
 
 
@@ -574,8 +593,8 @@ def get_session_bursts(session, region_acronym, FRAMES_PER_TRIAL, TOTAL_TRIALS, 
     velocities_df = get_mean_velocities(session, trials_df, BIN_DURATION)
  
     # merge results
-    temp = pd.merge(spike_df, burst_df, on=['trial','bin'])
-    temp = pd.merge(temp, velocities_df, on=['trial','bin'])
-    df = pd.merge(temp, network_burst_df, on=['trial','bin'])
+    df = pd.merge(spike_df, burst_df, on=['trial','bin'])
+    df = pd.merge(df, velocities_df, on=['trial','bin'])
+    df = pd.merge(df, network_burst_df, on=['trial','bin'])
     
     return  df
