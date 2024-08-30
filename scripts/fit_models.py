@@ -23,7 +23,7 @@ STRUCTURES = [['LGd','VISp'],['LGd','VISl'],['VISp', 'VISl']]
 def main():
     # load results and reformat 
     
-    df = pd.read_csv('data/feature_df.csv')
+    df = pd.read_csv('results/feature_df.csv')
     # do we need this?
     num_models = len(Y_FEATURE)*len(STRUCTURES)*len(SESSIONS)
 
@@ -54,14 +54,14 @@ def main():
                 # fit model
 
                 # scaling doesn't seem to be necessary
-                #scaler = preprocessing.StandardScaler().fit(x)
-                #x_scaled = scaler.transform(x)
+                scaler = preprocessing.StandardScaler().fit(x)
+                x_scaled = scaler.transform(x)
 
                 # fit GLM
-                reg = linear_model.LinearRegression().fit(x, y)
+                reg = linear_model.LinearRegression().fit(x_scaled, y)
 
                 # r2
-                r2 = reg.score(x, y)
+                r2 = reg.score(x_scaled, y)
 
                 # coefficients
                 coefs = reg.coef_
@@ -84,7 +84,7 @@ def main():
     STORE MODEL RESULTS TO FILE
     """
     # save results
-    df_results.to_csv('data/glm_results.csv', index=False)
+    df_results.to_csv('results/glm_results.csv', index=False)
 
 if __name__ == '__main__':
     main()
