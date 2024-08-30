@@ -94,10 +94,10 @@ def main():
         
             # extract spike and behavior features ---------------------------------------
             print('Extracting spike and behavior features...')
-            df = get_session_bursts(session_data, brain_structure, FRAMES_PER_TRIAL, 
+            behavior_df = get_session_bursts(session_data, brain_structure, FRAMES_PER_TRIAL, 
                                     TOTAL_TRIALS, BIN_DURATION, OVERLAP_THRESHOLD, WINDOW_SIZE)
-            for feature in df.columns[2:]:
-                df[feature] = spike_df[feature]
+            for feature in behavior_df.columns[2:]:
+                df[feature] = behavior_df[feature]
 
             # save intermediateresults
             df.to_csv(f'results/features/{session_id}_{brain_structure}.csv', index=False)
