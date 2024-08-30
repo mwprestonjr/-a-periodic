@@ -60,8 +60,8 @@ def apply_specparam(spectra, freqs, specparam_settings, n_jobs=-1):
     from specparam.objs import fit_models_3d, combine_model_objs
     
     spectra_rs = np.swapaxes(spectra, 1, 2) # make freq dimension last
-    sm = SpectralGroupModel(**specparam_settings)
-    sgm = fit_models_3d(sm, freqs, spectra_rs, n_jobs=n_jobs, verbose=False)
+    sm = SpectralGroupModel(**specparam_settings, verbose=False)
+    sgm = fit_models_3d(sm, freqs, spectra_rs, n_jobs=n_jobs)
     sgm = combine_model_objs(sgm)
     
     return sgm
