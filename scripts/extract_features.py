@@ -49,6 +49,7 @@ def main():
             print(f"\nAnalyzing session: {session_id}, region: {brain_structure} -----------------")
             
             # store results --------------------------------------------------------=----
+
             df = pd.DataFrame({
                 'session_id'     : [session_id]*1800,
                 'brain_structure': [brain_structure]*1800,
@@ -56,8 +57,7 @@ def main():
                 'trial'          : np.repeat(np.arange(30), 60),
                 'bin'            : np.tile(np.arange(30), 60)})
             
-            # extract LFP features -----------------------------------------------------
-            # get LFP events
+            # extract LFP features 
             lfp_epochs, time = get_lfp_epochs(session_data, fs=FS_LFP,
                                               brain_structure=brain_structure)
 
@@ -67,20 +67,24 @@ def main():
             tfr, tfr_freqs = compute_tfr(lfp_epochs, FS_LFP, FREQS, method='morlet', 
                                          n_morlet_cycle=N_CYCLES, n_jobs=N_JOBS)
             
-            # average over channels and reshape for extract_se
-            tfr = np.mean(tfr, axis=1)
-            tfr = tfr.reshape(tfr.shape[0], tfr.shape[1], int(tfr.shape[-1] / FS_LFP), FS_LFP)
+            tfr = np.mean(tfr, axis=1) # average over channels
             
             # extract spectral events
             print('  Computing spectral events')
             se_df = extract_se(tfr, FREQS, event_band=EVENT_BAND, fs=FS_LFP, n_jobs=N_JOBS)
+            tfr = tfr.reshape(tfr.shape[0],tfr.shape[1],int(tfr.shape[-1] / FS_LFP), FS_LFP)
+            
+            # spectral events
+            se_df = extract_se(tfr,FREQS,event_band=EVENT_BAND)
+                        
             for feature_in, feature in zip(["Peak Frequency", "Event Duration", "Normalized Peak Power"],
-                                           ["peak_frequency", "event_duration", "normalized_peak_power"]):
+                                            ["peak_frequency", "event_duration", "normalized_peak_power"]):
                 df[feature] = se_df[feature_in]
             
             # parameterize spectra, compute aperiodic exponent and total power
             print('  Parameterizing spectra')
             tfr = tfr.mean(axis=3) # average over 1 second bins
+            
             sgm = apply_specparam(tfr, tfr_freqs, SPECPARAM_SETTINGS, N_JOBS)
             exponent = sgm.get_params('aperiodic', 'exponent')
             df['exponent'] = exponent            
@@ -117,7 +121,6 @@ def main():
                                
     # display progress
     print_time_elapsed(t_start, "\n\nTotal analysis time: ")
-
 
 if __name__ == '__main__':
     main()
