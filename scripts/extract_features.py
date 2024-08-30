@@ -55,25 +55,23 @@ def main():
                                               brain_structure=brain_structure)
 
             # compute tfr
-            tfr_all, tfr_freqs = compute_tfr(lfp_epochs, FS_LFP, FREQS, decim=1.,
-                                             method='morlet', n_morlet_cycle=5, n_jobs=N_JOBS)
+            tfr, tfr_freqs = compute_tfr(lfp_epochs, FS_LFP, FREQS, decim=1,
+                                             method='morlet', n_morlet_cycle=N_CYCLES, n_jobs=N_JOBS)
             
             
-            tfr = np.mean(tfr_all, axis=1) # average over channels
+            tfr = np.mean(tfr, axis=1) # average over channels
             
-            tfr_epoch = tfr.reshape(tfr.shape[0],tfr.shape[1],int(tfr.shape[-1] / FS_LFP), FS_LFP)
+            tfr = tfr.reshape(tfr.shape[0],tfr.shape[1],int(tfr.shape[-1] / FS_LFP), FS_LFP)
             
             # spectral events
-            se_df = extract_se(tfr_epoch,FREQ)
-            
-            del tfr, tfr_all
-            
-            for feature_in, feature in zip([["Peak Frequency", "Event Duration", "Normalized Peak Power"],
-                                            ["peak_frequency", "event_duration", "normalized_peak_power"]]):
+            se_df = extract_se(tfr,FREQS,event_band=EVENT_BAND)
+                        
+            for feature_in, feature in zip(["Peak Frequency", "Event Duration", "Normalized Peak Power"],
+                                            ["peak_frequency", "event_duration", "normalized_peak_power"]):
                 df[feature] = se_df[feature_in]
             
             # decim TFR for spec param
-            tfr = tfr_epoch.mean(axis=3)
+            tfr = tfr.mean(axis=3)
             
             # parameterize spectra, compute aperiodic exponent and total power, and 
             sgm = apply_specparam(tfr, tfr_freqs, SPECPARAM_SETTINGS, N_JOBS)
@@ -82,7 +80,11 @@ def main():
             df['total_power'] = np.ravel(np.mean(tfr, axis=1))
             
             # flattened spectra
-            # tfr_flat = compute_flattened_spectra(sgm)
+            tfr_flat = compute_flattened_spectra(sgm)
+            
+            # find frequency with max power
+            avg_spec = tfr_flat.mean(axis=0)        
+            df['periodic_pow'] = tfr_flat[:,np.argmax(avg_spec)]
 
             # extract Spike Features ----------------------------------------------------
             spike_df = get_session_bursts(session_data, brain_structure, FRAMES_PER_TRIAL, 
@@ -94,7 +96,7 @@ def main():
             # store results
             df_list.append(df)
             # break # TEMP!         
-        # break # TEMP!
+        break # TEMP!
     
     # save results
     results = pd.concat(df_list)
