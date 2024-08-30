@@ -63,7 +63,7 @@ def main():
 
             # compute tfr
             print('Extracting LFP features...')
-            print('  Computing spectrogram...')
+            print('  Computing spectrogram')
             tfr, tfr_freqs = compute_tfr(lfp_epochs, FS_LFP, FREQS, method='morlet', 
                                          n_morlet_cycle=N_CYCLES, n_jobs=N_JOBS)
             
@@ -108,8 +108,8 @@ def main():
             # display progress
             print_time_elapsed(t_start_s, "Session/structure complete in: ")
             
-        #     break # TEMP!         
-        # break # TEMP!
+#             break # TEMP!         
+#         break # TEMP!
     
     # save results
     results = pd.concat(df_list)
