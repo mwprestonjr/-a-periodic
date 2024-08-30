@@ -23,14 +23,15 @@ STRUCTURES = [['LGd','VISp'],['LGd','VISl'],['VISp', 'VISl']]
 def main():
     # load results and reformat 
     
-    df = pd.read_csv('results/feature_df.csv')
+    df = pd.read_csv('scratch/results/feature_df.csv')
     # do we need this?
     num_models = len(Y_FEATURE)*len(STRUCTURES)*len(SESSIONS)
 
     df_results = pd.DataFrame({
     'session_id'     : [None]*num_models,
-    'brain_structure y': [None]*num_models,
     'brain_structure x': [None]*num_models,
+    'brain_structure y': [None]*num_models,
+    'y_feature' : [None]*num_models,
     'r_squ' : [None]*num_models,
     'coefs' : [None]*num_models})
 
@@ -67,8 +68,10 @@ def main():
 
                 # store model results
                 df_results['session_id'][c] = session
-                df_results['brain_structure y'][c] = ys
                 df_results['brain_structure x'][c] = xs
+                df_results['brain_structure y'][c] = ys
+                
+                df_results['y_feature'][c] = yf
                 df_results['r_squ'][c] = r2
                 df_results['coefs'][c] = coefs
 

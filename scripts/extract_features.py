@@ -116,7 +116,7 @@ def main():
             print_time_elapsed(t_start_s, "Session/structure complete in: ")
             
             #break # TEMP!         
-        break # TEMP!
+        #break # TEMP!
     
     # save results
     results = pd.concat(df_list)

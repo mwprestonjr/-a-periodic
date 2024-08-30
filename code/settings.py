@@ -10,7 +10,7 @@ FRAMES_PER_TRIAL = 900 # natural movies (Functional Connectivity)
 TOTAL_TRIALS = 60 # natural movies (Functional Connectivity)
 
 # data of interest
-SESSIONS = [766640955, 768515987,  835479236,  839557629] #ids (NOT SESSION_IDS)
+SESSIONS = [766640955, 768515987, 835479236]  #ids (NOT SESSION_IDS)
 # SESSIONS = [821695405, 778240327, 839068429] # These sessions have fewer than 10 LGd Units
 BRAIN_STRUCTURES = ['LGd', 'VISp', 'VISl']
 
