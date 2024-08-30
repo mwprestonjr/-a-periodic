@@ -19,11 +19,11 @@ from settings import *
 X_FEATURE = ['spike_count','proportion_bursting','exponent','periodic_pow']
 Y_FEATURE = ['exponent','periodic_pow']
 STRUCTURES = [['LGd','VISp'],['LGd','VISl'],['VISp', 'VISl']]
-
+SESSIONS = [766640955]
 def main():
     # load results and reformat 
     
-    df = pd.read_csv('data/feature_df.csv')
+    df = pd.read_csv('results/feature_df.csv')
     # do we need this?
     num_models = len(Y_FEATURE)*len(STRUCTURES)*len(SESSIONS)
 
@@ -37,6 +37,7 @@ def main():
     # loop over sessions - fit model for each session
     c = 0
     for session in SESSIONS:
+        print(f"fitting session: " + str(session))
         for s in STRUCTURES:
             xs, ys = s
             for yf in Y_FEATURE:
@@ -74,7 +75,7 @@ def main():
 
                 # increase count
                 c += 1
-        #break
+        break
         
     """
     STORE MODEL RESULTS TO FILE
