@@ -24,7 +24,7 @@ ALPHA = 0.05 # significance
 
 def main():
     # load results and reformat 
-    df = pd.read_csv('data/feature_df.csv')
+    df = pd.read_csv('scratch/feature_df.csv')
     df.insert(4, 'trial_idx', np.tile(np.repeat(np.arange(60), 30), 9))
     
     # init results
@@ -85,11 +85,11 @@ def main():
                         c += 1
 
     # save results
-    df_results.to_csv('data/glm_bootstrap.csv', index=False)
+    df_results.to_csv('scratch/glm_bootstrap.csv', index=False)
     
     # compute significance
-    df_glm = pd.read_csv("/data/glm_results.csv")
-    df_bootstrap = pd.read_csv('/data/glm_bootstrap.csv')
+    df_glm = pd.read_csv("/scratch/glm_results.csv")
+    df_bootstrap = pd.read_csv('/scratch/glm_bootstrap.csv')
     p_values = []
     for ii in range(len(df_glm)):
         row = df_glm.iloc[ii]
@@ -101,7 +101,7 @@ def main():
     holm = multipletests(p_values, ALPHA, method='holm')
     df_glm['p_corr'] = holm[1]
     df_glm['significant'] = holm[0]
-    df_glm.to_csv('data/glm_stats.csv', index=False)
+    df_glm.to_csv('scratch/glm_stats.csv', index=False)
 
 
 def compute_pvalue(value, distribution):

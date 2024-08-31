@@ -28,8 +28,8 @@ def main():
     
     # create ouput dir
     for folder in ['tfr', 'features']:
-        if not os.path.exists(f"results/{folder}"):
-            os.makedirs(f"results/{folder}")
+        if not os.path.exists(f"scratch/{folder}"):
+            os.makedirs(f"scratch/{folder}")
     
     # load project cache
     cache = load_project_cache()
@@ -90,7 +90,7 @@ def main():
             # flattened spectra
             print('  Flattening spectra')
             tfr_flat = compute_flattened_spectra(sgm)
-            np.save(f'results/tfr/{session_id}_{brain_structure}.npy', tfr_flat)
+            np.save(f'scratch/tfr/{session_id}_{brain_structure}.npy', tfr_flat)
             
             # find maximum power
             # find frequency with max power
@@ -107,7 +107,7 @@ def main():
                 df[feature] = behavior_df[feature]
 
             # save intermediateresults
-            df.to_csv(f'results/features/{session_id}_{brain_structure}.csv', index=False)
+            df.to_csv(f'scratch/features/{session_id}_{brain_structure}.csv', index=False)
             
             # store results
             df_list.append(df)
@@ -120,7 +120,7 @@ def main():
     
     # save results
     results = pd.concat(df_list)
-    results.to_csv('data/feature_df.csv', index=False)
+    results.to_csv('scratch/feature_df.csv', index=False)
                                
     # display progress
     print_time_elapsed(t_start, "\n\nTotal analysis time: ")
