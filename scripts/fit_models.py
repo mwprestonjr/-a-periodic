@@ -8,7 +8,6 @@ import numpy as np
 import pandas as pd
 from sklearn import linear_model
 from sklearn import preprocessing
-#from glmtools.fit import ols_fit
 
 # imports - custom
 import sys
@@ -16,14 +15,15 @@ sys.path.append("code")
 from settings import *
 
 # settings
-X_FEATURE = ['spike_count','proportion_bursting','exponent','periodic_pow']
+X_FEATURE = ['spike_count','burst_count','proportion_bursting','exponent','periodic_pow','mean_velocity']
 Y_FEATURE = ['exponent','periodic_pow']
-STRUCTURES = [['LGd','VISp'],['LGd','VISl'],['VISp', 'VISl']]
-# SESSIONS = [766640955]
+STRUCTURES = [['LGd','VISp'],['VISl','VISp'],['LGd','VISl'],['VISp', 'VISl']]
+
+
 def main():
     # load results and reformat 
     
-    df = pd.read_csv('results/feature_df.csv')
+    df = pd.read_csv('data/feature_df.csv')
     # do we need this?
     num_models = len(Y_FEATURE)*len(STRUCTURES)*len(SESSIONS)
 
@@ -32,8 +32,9 @@ def main():
     'brain_structure x': [None]*num_models,
     'brain_structure y': [None]*num_models,
     'y_feature' : [None]*num_models,
-    'r_squ' : [None]*num_models,
-    'coefs' : [None]*num_models})
+    'r_squ' : [None]*num_models})
+    for ii, feature in enumerate(X_FEATURE):
+        df_results[f"coef_{feature}"] = [None]*num_models
 
     # loop over sessions - fit model for each session
     c = 0
@@ -73,18 +74,15 @@ def main():
                 
                 df_results['y_feature'][c] = yf
                 df_results['r_squ'][c] = r2
-                df_results['coefs'][c] = coefs
-
+                for ii, feature in enumerate(X_FEATURE):
+                    df_results[f"coef_{feature}"][c] = coefs[ii+1]
 
                 # increase count
                 c += 1
-        # break
-        
-    """
-    STORE MODEL RESULTS TO FILE
-    """
+
     # save results
-    df_results.to_csv('results/glm_results.csv', index=False)
+    df_results.to_csv('data/glm_results.csv', index=False)
+
 
 if __name__ == '__main__':
     main()
